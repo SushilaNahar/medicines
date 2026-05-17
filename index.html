@@ -8,7 +8,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #FDF3E7; font-family: Georgia, 'Times New Roman', serif; }
+    body { background: #F9F9F9; font-family: Georgia, 'Times New Roman', serif; }
     button { font-family: Georgia, 'Times New Roman', serif; cursor: pointer; }
   </style>
 </head>
@@ -18,9 +18,9 @@
     const { createElement: h, useState, Fragment } = React;
 
     const C = {
-      bg:'#FDF3E7', card:'#FFFFFF', card2:'#FEF9F2', border:'#E8D5B7',
-      orange:'#C4511A', orangeL:'#E8834A', text:'#1A1A1A', textMid:'#444444',
-      textSoft:'#777777', green:'#2E7D32', greenBg:'#E8F5E9', tabBg:'#F5E6D0',
+      bg:'#F9F9F9', card:'#FFFFFF', card2:'#F9F9F9', border:'#E5E5E5',
+      orange:'#FFD52E', orangeL:'#FFE066', text:'#1C1C1E', textMid:'#3A3A3C',
+      textSoft:'#8E8E93', green:'#2E7D32', greenBg:'#E8F5E9', tabBg:'#FFD52E',
     };
 
     const HOME_MEDS = [
@@ -163,10 +163,10 @@
           h('div', { style:{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:8 } },
             h('span', { style:{ fontSize:15, fontWeight:'700', color:C.text, flexShrink:1,
               textDecoration: props.checked ? 'line-through':'none' } }, props.name),
-            h('span', { style:{ fontSize:11, fontWeight:'700', color:C.orange, background:'#FEF0E6',
+            h('span', { style:{ fontSize:11, fontWeight:'700', color:'#1C1C1E', background:'#FFD52E',
               padding:'3px 10px', borderRadius:20, whiteSpace:'nowrap', flexShrink:0 } }, props.type)
           ),
-          props.showQty && props.qty && h('div', { style:{ fontSize:12, color:C.orange, fontWeight:'700', marginTop:5 } }, 'Qty: '+props.qty),
+          props.showQty && props.qty && h('div', { style:{ fontSize:12, color:'#8E8E93', fontWeight:'700', marginTop:5 } }, 'Qty: '+props.qty),
           h('div', { style:{ fontSize:13, color:C.textMid, marginTop:6, lineHeight:1.65 } }, props.desc)
         )
       );
@@ -178,7 +178,7 @@
         style:{ padding:'10px 16px', borderRadius:10,
           border:'2px solid '+(props.active ? C.orange : C.border),
           background: props.active ? C.orange : C.card,
-          color: props.active ? '#fff' : C.textMid,
+          color: props.active ? '#1C1C1E' : C.textMid,
           fontSize:14, fontWeight: props.active ? '700':'400' }
       }, props.label);
     }
@@ -188,10 +188,10 @@
         onClick: props.disabled ? null : props.onClick,
         style:{ flex:1, padding:15, borderRadius:12,
           background: props.disabled ? C.border : C.orange,
-          color: props.disabled ? C.textSoft : '#fff',
+          color: props.disabled ? C.textSoft : '#1C1C1E',
           border:'none', fontSize:15, fontWeight:'700',
           opacity: props.disabled ? 0.5 : 1,
-          boxShadow: props.disabled ? 'none' : '0 3px 12px rgba(196,81,26,0.25)' }
+          boxShadow: props.disabled ? 'none' : '0 3px 12px rgba(0,0,0,0.15)' }
       }, props.label);
     }
 
@@ -224,12 +224,12 @@
           display:'flex', justifyContent:'space-between', alignItems:'center' }
       },
         h('div', null,
-          h('div', { style:{ fontSize:14, fontWeight:'700', color:'#fff' } }, props.topLine),
-          props.bottomLine && h('div', { style:{ fontSize:12, color:'rgba(255,255,255,0.85)', marginTop:4 } }, props.bottomLine)
+          h('div', { style:{ fontSize:14, fontWeight:'700', color:'#1C1C1E' } }, props.topLine),
+          props.bottomLine && h('div', { style:{ fontSize:12, color:'#3A3A3C', marginTop:4 } }, props.bottomLine)
         ),
-        h('div', { style:{ background:'rgba(255,255,255,0.18)', borderRadius:12, padding:'10px 16px', textAlign:'center' } },
-          h('div', { style:{ fontSize:24, fontWeight:'700', color:'#fff' } }, props.count),
-          h('div', { style:{ fontSize:11, color:'rgba(255,255,255,0.85)' } }, props.label)
+        h('div', { style:{ background:'rgba(0,0,0,0.08)', borderRadius:12, padding:'10px 16px', textAlign:'center' } },
+          h('div', { style:{ fontSize:24, fontWeight:'700', color:'#1C1C1E' } }, props.count),
+          h('div', { style:{ fontSize:11, color:'#3A3A3C' } }, props.label)
         )
       );
     }
@@ -278,8 +278,8 @@
         h('div', { style:{ background:'linear-gradient(135deg,'+C.orange+','+C.orangeL+')',
           padding:'28px 20px 20px', textAlign:'center' } },
           h('div', { style:{ fontSize:28, marginBottom:6 } }, '💊 🧳'),
-          h('h1', { style:{ color:'#fff', fontSize:22, fontWeight:'700', margin:'0 0 4px' } }, 'Family Medicine App'),
-          h('p',  { style:{ color:'rgba(255,255,255,0.8)', fontSize:12, margin:0 } }, 'Travel Kit Builder & Home Cabinet')
+          h('h1', { style:{ color:'#1C1C1E', fontSize:22, fontWeight:'700', margin:'0 0 4px' } }, 'Family Medicine App'),
+          h('p',  { style:{ color:'#3A3A3C', fontSize:12, margin:0 } }, 'Travel Kit Builder & Home Cabinet')
         ),
 
         // Tabs
@@ -288,7 +288,7 @@
             return h('button', { key:t.id, onClick:function(){ setTab(t.id); }, style:{
               flex:1, padding:'14px 10px', border:'none',
               background: tab===t.id ? C.card : 'transparent',
-              color: tab===t.id ? C.orange : C.textSoft,
+              color: tab===t.id ? '#1C1C1E' : C.textSoft,
               fontSize:14, fontWeight: tab===t.id ? '700':'400',
               borderBottom:'3px solid '+(tab===t.id ? C.orange:'transparent'),
             }}, t.label);
@@ -302,10 +302,10 @@
           step === 0 && h(Card, null,
             h('div', { style:{ textAlign:'center', padding:'16px 0 20px' } },
               h('div', { style:{ fontSize:48, marginBottom:12 } }, '🧳'),
-              h('h2', { style:{ color:C.orange, fontSize:20, margin:'0 0 12px', fontWeight:'700' } }, 'Hello, Super Mum!'),
+              h('h2', { style:{ color:C.orange, fontSize:20, margin:'0 0 12px', fontWeight:'700' } }, 'Family Travel Medical Kit'),
               h('p',  { style:{ color:C.textMid, fontSize:14, lineHeight:1.7, margin:'0 0 6px' } },
-                'Tell me about your family and trip. I will build a personalised medicine kit with only what you actually need.'),
-              h('p',  { style:{ color:C.textSoft, fontSize:12 } }, 'No guesswork. No overpacking.')
+                'Answer 3 questions to get a personalised list of medicines for your trip. Based on your family size, ages and destination.'),
+              
             ),
             h('div', { style:{ display:'flex' } }, h(BigBtn, { label:"Let's Build My Kit →", onClick:function(){ setStep(1); } }))
           ),
@@ -384,7 +384,7 @@
             }),
             kit.map(function(sec){
               return h(Card, { key:sec.section },
-                h('div', { style:{ fontSize:16, fontWeight:'700', color:C.orange, marginBottom:14 } }, sec.section),
+                h('div', { style:{ fontSize:16, fontWeight:'700', color:'#1C1C1E', marginBottom:14 } }, sec.section),
                 sec.items.map(function(item){
                   return h(MedRow, { key:item.name, name:item.name, type:item.type,
                     qty:item.qty, desc:item.desc, showQty:true,
