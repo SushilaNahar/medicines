@@ -4,430 +4,1071 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>Family Medicine App</title>
-
-  <!-- PWA home screen support -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Medicine" />
   <meta name="theme-color" content="#FFD52E" />
-  <meta name="mobile-web-app-capable" content="yes" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <link rel="icon" type="image/svg+xml" href="icon.svg" />
   <link rel="manifest" href="manifest.json" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #F9F9F9; -webkit-tap-highlight-color: transparent; font-family: Georgia, 'Times New Roman', serif; }
+    body { background: #F9F9F9; font-family: Georgia, 'Times New Roman', serif; -webkit-tap-highlight-color: transparent; }
     button { font-family: Georgia, 'Times New Roman', serif; cursor: pointer; }
+    input { font-family: Georgia, 'Times New Roman', serif; }
+    ::-webkit-scrollbar { display: none; }
   </style>
 </head>
 <body>
-  <div id="root"></div>
-  <script>
-    const { createElement: h, useState, Fragment } = React;
+<div id="root"></div>
+<script>
+const { createElement: h, useState, Fragment } = React;
 
-    const C = {
-      bg:'#F9F9F9', card:'#FFFFFF', card2:'#F9F9F9', border:'#E5E5E5',
-      orange:'#FFD52E', orangeL:'#FFE066', text:'#1C1C1E', textMid:'#3A3A3C',
-      textSoft:'#8E8E93', green:'#2E7D32', greenBg:'#E8F5E9', tabBg:'#FFD52E',
-    };
+// ── Colours ──────────────────────────────────────────────────────────────────
+const C = {
+  bg:'#F9F9F9', card:'#FFFFFF', card2:'#F9F9F9', border:'#E5E5E5',
+  yellow:'#FFD52E', yellowD:'#E5BE00', text:'#1C1C1E', textMid:'#3A3A3C',
+  textSoft:'#8E8E93', green:'#2E7D32', greenBg:'#E8F5E9',
+  red:'#C0392B', redBg:'#FDEDEC', tabBg:'#FFD52E',
+};
 
-    const HOME_MEDS = [
-      { id:1,  name:'Adusol',             type:'Syrup',          use:'Cough',               desc:'Relieves dry and wet cough in both adults and children. Soothes the throat and reduces irritation.' },
-      { id:2,  name:'Asthalin',           type:'Spray',          use:'Asthma',              desc:'Opens up the airways during asthma or breathing difficulty. Gives rapid relief within minutes. Use only as prescribed.' },
-      { id:3,  name:'Betadine',           type:'Ointment',       use:'Antiseptic',          desc:'Cleans and protects cuts, wounds and scrapes from bacterial infection. Apply directly on the wound after cleaning.' },
-      { id:4,  name:'Candid B',           type:'Ointment',       use:'Fungal Infection',    desc:'Treats fungal skin infections, itchy rashes and redness. Apply a thin layer on the affected area twice a day.' },
-      { id:5,  name:'Ciplox',             type:'Drops',          use:'Eyes / Ears',         desc:'Treats bacterial infections in the eyes and ears. Relieves redness, discharge and irritation.' },
-      { id:6,  name:'Combiflam',          type:'Tablet',         use:'Pain Killer',         desc:'Reduces pain, swelling and fever together. Works well for body ache, joint pain and mild to moderate fever.' },
-      { id:7,  name:'Crocin',             type:'Tablet / Syrup', use:'Fever / Headache',    desc:'Brings down fever and relieves headache quickly. Safe for children when given in the correct dose for their weight.' },
-      { id:8,  name:'Cyclopam',           type:'Tablet',         use:'Stomach Ache',        desc:'Relieves stomach cramps and spasms caused by gas, indigestion or irritable bowel.' },
-      { id:9,  name:'Digene',             type:'Tablet',         use:'Indigestion',         desc:'Neutralises excess stomach acid and relieves bloating, acidity and a heavy feeling after meals.' },
-      { id:10, name:'Demustal',           type:'Tablet',         use:'Vomiting',            desc:'Controls nausea and vomiting caused by illness, food poisoning or motion sickness.' },
-      { id:11, name:'Doxinate',           type:'Tablet',         use:'Nausea',              desc:'Prevents nausea and motion sickness on long journeys. Best taken 30 minutes before travel.' },
-      { id:12, name:'Fklina',             type:'Tablet',         use:'Cold / Cough',        desc:'Combines cold and cough relief in one tablet. Reduces runny nose, sneezing and throat irritation.' },
-      { id:13, name:'Herperax',           type:'Ointment',       use:'Herpes / Cold Sores', desc:'Applied on herpes-related skin infections and cold sores around the mouth or lips. Reduces healing time.' },
-      { id:14, name:'Immodium',           type:'Tablet',         use:'Diarrhoea',           desc:'Quickly stops loose motions and diarrhoea. Very effective for travel-related stomach upsets.' },
-      { id:15, name:'Ibugesic Plus',      type:'Tablet / Syrup', use:'Pain Killer',         desc:'Pain and fever relief that is gentler on the stomach. The syrup form is especially suitable for children.' },
-      { id:16, name:'Iodex',              type:'Ointment',       use:'Muscle / Joint Pain', desc:'Massage ointment for muscle pain, joint stiffness and sprains. The warming effect brings quick relief.' },
-      { id:17, name:'Dolo 600',           type:'Tablet',         use:'Fever',               desc:'Stronger fever relief for adults. Brings down high temperature effectively within 30 to 45 minutes.' },
-      { id:18, name:'Milk of Magnesia',   type:'Syrup / Tablet', use:'Acidity',             desc:'Relieves acidity, heartburn and constipation. A gentle antacid that is safe for the whole family.' },
-      { id:19, name:'Myospaz',            type:'Tablet',         use:'Muscular Pain',       desc:'Relaxes painful muscle spasms in the back, neck and shoulders. Useful after long journeys.' },
-      { id:20, name:'Nutrolin B Plus',    type:'Capsule',        use:'Vitamin B Complex',   desc:'Replenishes Vitamin B levels depleted during illness or travel. Boosts energy and immunity.' },
-      { id:21, name:'Otrivin',            type:'Nasal Spray',    use:'Blocked Nose',        desc:'Unblocks a stuffy nose within seconds. Safe for children and adults. Makes sleeping much easier.' },
-      { id:22, name:'Pudin Hara',         type:'Capsule',        use:'Indigestion',         desc:'Natural peppermint capsule that relieves gas, bloating and acidity after meals.' },
-      { id:23, name:'Recofast Plus',      type:'Tablet',         use:'Cold',                desc:'All-in-one tablet for cold, runny nose, sneezing and mild fever. Gives relief within an hour.' },
-      { id:24, name:'Roko',               type:'Tablet',         use:'Dysentery',           desc:'Treats dysentery and severe loose motions. Also effective for stomach infections with cramping.' },
-      { id:25, name:'Vicks',              type:'Ointment',       use:'Cold / Congestion',   desc:'Apply on the chest and back to ease cold, cough and blocked breathing. Very comforting at night.' },
-      { id:26, name:'Zinda Tilasmath',    type:'Drops',          use:'Multipurpose',        desc:'Ayurvedic drops for headache, cold, nasal congestion and insect bites. Tiny bottle, very useful.' },
-      { id:27, name:'Zole F',             type:'Ointment',       use:'Fungal Infection',    desc:"Treats stubborn fungal infections, athlete's foot, ringworm and rashes caused by moisture or sweat." },
-      { id:28, name:'Doxy',               type:'Tablet',         use:'Antibiotic',          desc:"A broad antibiotic for bacterial infections. Needs a doctor's prescription — do not self-medicate." },
-      { id:29, name:'Augmentine Duo 625', type:'Tablet',         use:'Antibiotic',          desc:'Strong antibiotic for respiratory, dental and skin infections. Always take the full course as prescribed.' },
-      { id:30, name:'Azee',               type:'Tablet',         use:'Sore Throat',         desc:'Antibiotic for throat infections and tonsillitis. Usually given as a 3 or 5-day course by a doctor.' },
-      { id:31, name:'Enzoflam',           type:'Tablet',         use:'Toothache / Pain',    desc:'Relieves toothache, dental pain, earache and post-surgery swelling. Has anti-inflammatory properties.' },
-      { id:32, name:'Alex',               type:'Syrup',          use:'Sore Throat / Cough', desc:'Soothes an irritated throat and suppresses dry cough. Pleasant tasting and easy for children to take.' },
-      { id:33, name:'Allegra 180',        type:'Tablet',         use:'Allergy',             desc:'Treats allergies including sneezing, runny nose, skin rashes and hives. Non-drowsy formula.' },
-      { id:34, name:'Enterogermina',      type:'Capsule',        use:'Stomach Infection',   desc:'A probiotic that restores healthy gut bacteria after stomach infections or a course of antibiotics.' },
-    ];
+// ── Full medicine data ────────────────────────────────────────────────────────
+const MEDS = [
+  { id:1,  name:'Adusol',             type:'Syrup',          cat:'Respiratory',
+    desc:'Relieves dry and wet cough in adults and children. Soothes the throat lining.',
+    treats:['Cough','Wet Cough','Dry Cough'],
+    adultDose:'10ml three times a day', childDose:'5ml (6-12 yrs) · 2.5ml (under 6)',
+    freq:'3 times a day', food:'After food',
+    warning:'Do not exceed stated dose. Shake well before use.' },
 
-    const DESTINATIONS = [
-      { id:'hill',   label:'Hill Station',     emoji:'🏔️', desc:'Cold weather, altitude, trekking' },
-      { id:'beach',  label:'Beach',            emoji:'🏖️', desc:'Heat, humidity, sand and sea' },
-      { id:'abroad', label:'Abroad',           emoji:'✈️', desc:'International travel' },
-      { id:'city',   label:'City / Road Trip', emoji:'🚗', desc:'Domestic urban travel' },
-    ];
+  { id:2,  name:'Asthalin',           type:'Spray',          cat:'Respiratory',
+    desc:'Opens up airways during asthma or breathing difficulty. Fast relief within minutes.',
+    treats:['Asthma','Wheezing','Breathing Difficulty'],
+    adultDose:'1-2 puffs as needed', childDose:'1 puff as needed (with spacer for young children)',
+    freq:'As needed, max every 4 hours', food:'Not applicable',
+    warning:'Use only as prescribed. Overuse can be harmful. See a doctor if needed more than 3 times a week.' },
 
-    function buildKit(numKids, kidAges, adults, days, dest) {
-      const hasToddler  = kidAges.some(function(a){ return a <= 4; });
-      const hasSmallKid = kidAges.some(function(a){ return a <= 10; });
-      const longTrip    = days > 7;
-      const isHill      = dest === 'hill';
-      const isBeach     = dest === 'beach';
-      const isAbroad    = dest === 'abroad';
-      const fQty        = longTrip ? '10' : '6';
-      const sQty        = longTrip ? '8'  : '6';
+  { id:3,  name:'Betadine',           type:'Ointment',       cat:'First Aid',
+    desc:'Antiseptic that cleans and protects cuts, wounds and scrapes from infection.',
+    treats:['Cut','Wound','Scrape','Infection Prevention'],
+    adultDose:'Apply thin layer on wound', childDose:'Apply thin layer, cover with bandage',
+    freq:'2-3 times a day until healed', food:'Not applicable',
+    warning:'Do not swallow. Keep away from eyes. Stop if skin irritation develops.' },
 
-      var sections = [
-        { section:'🌡️ Fever & Pain', items:[
-          { name:'Crocin',    type: hasToddler ? 'Syrup + Tablet':'Tablet', qty: hasToddler ? '1 syrup + 10 tablets':'10 tablets', desc:'Brings down fever and relieves headache. Safe for all ages including young children.' },
-          { name:'Dolo 600',  type:'Tablet', qty: fQty+' tablets', desc:'Stronger fever relief for adults. Effective within 30 to 45 minutes.' },
-          { name:'Combiflam', type:'Tablet', qty: fQty+' tablets', desc:'Reduces pain, swelling and fever together in one tablet. Good for body ache.' },
-          { name:'Myospaz',   type:'Tablet', qty:'6 tablets',      desc:'Relaxes muscle spasms after long car rides or flights.' },
-        ]},
-        { section:'🤢 Stomach & Digestion', items:[
-          { name:'Cyclopam',         type:'Tablet',  qty: sQty+' tablets', desc:'Relieves stomach cramps and spasms caused by new food or water.' },
-          { name:'Digene',           type:'Tablet',  qty:'10 tablets',     desc:'Neutralises stomach acid and relieves bloating and acidity from eating out.' },
-          { name:'Doxinate',         type:'Tablet',  qty:'8 tablets',      desc:'Prevents nausea and motion sickness. Take 30 minutes before your journey.' },
-          { name:'Immodium',         type:'Tablet',  qty: sQty+' tablets', desc:'Quickly stops loose motions caused by water or food changes.' },
-          { name:'Roko',             type:'Tablet',  qty:'6 tablets',      desc:'Treats dysentery and severe stomach infections with cramping.' },
-          { name:'Enterogermina',    type:'Capsule', qty:'6 capsules',     desc:'Restores good gut bacteria. Helps the stomach recover faster from bugs.' },
-          { name:'Milk of Magnesia', type:'Syrup',   qty:'1 small bottle', desc:'Relieves constipation and acidity caused by travel food changes.' },
-        ]},
-        { section:'🤧 Cold, Cough & Nose', items:[
-          { name:'Recofast Plus', type:'Tablet',      qty:'8 tablets',   desc:'All-in-one cold tablet for runny nose, sneezing and mild fever.' },
-          { name:'Otrivin',       type:'Nasal Spray', qty:'1 spray',     desc:'Unblocks a stuffy nose in seconds. Children sleep so much better with this.' },
-          { name:'Adusol',        type:'Syrup',       qty:'1 bottle',    desc:'Relieves dry and wet cough. Hard to find in remote areas.' },
-          { name:'Vicks',         type:'Ointment',    qty:'1 small jar', desc:'Apply on the chest and back at night to ease cold and congestion.' },
-        ]},
-        { section:'🩹 First Aid & Skin', items:[
-          { name:'Betadine',        type:'Ointment',  qty:'1 tube',         desc:'Cleans and protects cuts and wounds from infection. Children always get scrapes.' },
-          { name:'Iodex',           type:'Ointment',  qty:'1 tube',         desc:'Massage for sprains, joint pain and muscle soreness from carrying luggage.' },
-          { name:'Ciplox',          type:'Eye Drops', qty:'1 bottle',       desc: isBeach ? 'Treats eye irritation from sand and salt water at the beach.' : 'Treats eye irritation from dust and pollution.' },
-          { name:'Zinda Tilasmath', type:'Drops',     qty:'1 small bottle', desc:'Ayurvedic drops for headache, cold, nasal congestion and insect bites.' },
-        ]},
-        { section:'💊 Antibiotics — Doctor First!', items:[
-          { name:'Augmentine Duo 625', type:'Tablet', qty:'Only if prescribed', desc:'Strong antibiotic. Never take without a doctor prescribing it first.' },
-        ]},
-      ];
+  { id:4,  name:'Candid B',           type:'Ointment',       cat:'Skin',
+    desc:'Treats fungal skin infections, itchy rashes and redness on the skin.',
+    treats:['Fungal Infection','Skin Rash','Itching','Redness'],
+    adultDose:'Apply thin layer on affected area', childDose:'Apply thin layer on affected area',
+    freq:'Twice a day', food:'Not applicable',
+    warning:'For external use only. Do not use on face without doctor advice. Do not use for more than 2 weeks.' },
 
-      if (hasSmallKid) sections[0].items.splice(3,0,{ name:'Ibugesic Plus', type:'Syrup', qty:'1 bottle', desc:'Gentle pain and fever syrup for children. Easier on their stomachs than tablets.' });
-      if (isHill)      sections[0].items.push({ name:'Enzoflam',   type:'Tablet', qty:'6 tablets',  desc:'Relieves muscle soreness from trekking and toothache from cold exposure.' });
-      if (isHill)      sections[2].items.push({ name:'Fklina',     type:'Tablet', qty:'8 tablets',  desc:'Stronger cold and cough tablet for harsh cold hill weather.' });
-      if (isHill||isAbroad) sections[2].items.push({ name:'Alex', type:'Syrup', qty:'1 bottle',  desc:'Soothes a sore throat caused by dry or cold air.' });
-      if (isAbroad)    sections[2].items.push({ name:'Allegra 180',type:'Tablet', qty:'10 tablets',desc:'Treats unexpected allergies and sneezing in new environments.' });
-      if (isAbroad)    sections[2].items.push({ name:'Azee',       type:'Tablet', qty:'6 tablets', desc:'Antibiotic for throat infections. Pharmacies abroad are very expensive.' });
-      if (isBeach)     sections[3].items.push({ name:'Candid B',   type:'Ointment',qty:'1 tube',  desc:'Treats fungal rashes caused by humidity and sweat at the beach.' });
-      if (isBeach||isAbroad) sections[3].items.push({ name:'Zole F', type:'Ointment',qty:'1 tube',desc:'Treats stubborn fungal infections made worse by wet conditions.' });
-      if (isAbroad)    sections[4].items.push({ name:'Doxy',       type:'Tablet', qty:'Only if prescribed',desc:"Ask your doctor before international travel." });
-      if (longTrip)    sections.push({ section:'🌿 Supplements', items:[{ name:'Nutrolin B Plus', type:'Capsule', qty:'1 per day', desc:'Replenishes Vitamin B depleted by travel stress and irregular eating.' }]});
+  { id:5,  name:'Ciplox',             type:'Drops',          cat:'Eyes & Ears',
+    desc:'Treats bacterial infections in eyes and ears. Relieves redness and discharge.',
+    treats:['Eye Infection','Ear Infection','Red Eye','Eye Discharge'],
+    adultDose:'1-2 drops in affected eye/ear', childDose:'1 drop in affected eye/ear',
+    freq:'Every 4-6 hours', food:'Not applicable',
+    warning:'Do not touch dropper tip to eye. Discard 4 weeks after opening. See doctor if no improvement in 2 days.' },
 
-      return sections;
-    }
+  { id:6,  name:'Combiflam',          type:'Tablet',         cat:'Pain & Fever',
+    desc:'Combines ibuprofen and paracetamol to reduce pain, swelling and fever together.',
+    treats:['Fever','Body Ache','Joint Pain','Headache','Pain'],
+    adultDose:'1 tablet every 6-8 hours', childDose:'Not recommended under 6 years. Ask doctor for 6-12 years.',
+    freq:'Every 6-8 hours, max 3 times a day', food:'After food — important to protect stomach',
+    warning:'Do not take on empty stomach. Not for stomach ulcer patients. Do not combine with other ibuprofen products.' },
 
-    // ── Reusable pieces ───────────────────────────────────────────────────────
+  { id:7,  name:'Crocin',             type:'Tablet / Syrup', cat:'Pain & Fever',
+    desc:'Paracetamol — brings down fever and relieves headache. Safe for all ages.',
+    treats:['Fever','Headache','Mild Pain','Temperature'],
+    adultDose:'1-2 tablets every 4-6 hours, max 8 tablets/day',
+    childDose:'Syrup: 5-10ml every 4-6 hours based on weight. Tablet: 1 tablet (6-12 yrs)',
+    freq:'Every 4-6 hours as needed', food:'With or without food',
+    warning:'Do not exceed 8 tablets in 24 hours. Do not combine with Dolo 600 — both contain paracetamol.' },
 
-    function Stepper(props) {
-      return h('div', { style:{ display:'flex', alignItems:'center' } },
-        h('button', {
-          onClick: function(){ props.onChange(Math.max(1, props.value - 1)); },
-          style:{ width:42, height:42, borderRadius:'10px 0 0 10px', border:'1.5px solid '+C.border,
-            borderRight:'none', background:C.card, color:C.orange, fontSize:22, fontWeight:'700' }
-        }, '−'),
-        h('div', {
-          style:{ width:52, height:42, border:'1.5px solid '+C.border, background:C.card2,
-            display:'flex', alignItems:'center', justifyContent:'center',
-            fontSize:16, fontWeight:'700', color:C.text }
-        }, props.value),
-        h('button', {
-          onClick: function(){ props.onChange(Math.min(18, props.value + 1)); },
-          style:{ width:42, height:42, borderRadius:'0 10px 10px 0', border:'1.5px solid '+C.border,
-            borderLeft:'none', background:C.card, color:C.orange, fontSize:22, fontWeight:'700' }
-        }, '+')
-      );
-    }
+  { id:8,  name:'Cyclopam',           type:'Tablet',         cat:'Digestive',
+    desc:'Relieves stomach cramps and spasms. Works on smooth muscle of the gut.',
+    treats:['Stomach Ache','Stomach Cramps','Bloating','Irritable Bowel'],
+    adultDose:'1-2 tablets 3 times a day', childDose:'1 tablet 3 times a day (6-12 yrs)',
+    freq:'3 times a day', food:'30 minutes before food',
+    warning:'May cause dry mouth and drowsiness. Do not drive after taking. Not for under 6 years.' },
 
-    function MedRow(props) {
-      return h('div', {
-        onClick: props.onToggle,
-        style:{ display:'flex', gap:12, padding:14, borderRadius:12, cursor:'pointer', marginBottom:10,
-          border:'1px solid '+(props.checked ? '#A5D6A7' : C.border),
-          background: props.checked ? C.greenBg : C.card, opacity: props.checked ? 0.6 : 1 }
-      },
-        h('div', { style:{ marginTop:2, minWidth:24, width:24, height:24, borderRadius:7, flexShrink:0,
-          border:'2px solid '+(props.checked ? C.green : C.border),
-          background: props.checked ? C.green : 'transparent',
-          display:'flex', alignItems:'center', justifyContent:'center' }},
-          props.checked && h('span', { style:{ color:'#fff', fontSize:15 } }, '✓')
-        ),
-        h('div', { style:{ flex:1, minWidth:0 } },
-          h('div', { style:{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:8 } },
-            h('span', { style:{ fontSize:15, fontWeight:'700', color:C.text, flexShrink:1,
-              textDecoration: props.checked ? 'line-through':'none' } }, props.name),
-            h('span', { style:{ fontSize:11, fontWeight:'700', color:'#1C1C1E', background:'#FFD52E',
-              padding:'3px 10px', borderRadius:20, whiteSpace:'nowrap', flexShrink:0 } }, props.type)
+  { id:9,  name:'Digene',             type:'Tablet / Gel',   cat:'Digestive',
+    desc:'Antacid that neutralises excess stomach acid. Relieves bloating and acidity after meals.',
+    treats:['Acidity','Indigestion','Bloating','Heartburn','Gas'],
+    adultDose:'2 tablets after meals and at bedtime', childDose:'1 tablet after meals (6-12 yrs)',
+    freq:'After each meal and at bedtime', food:'After food',
+    warning:'Do not take for more than 2 weeks without doctor advice. Contains antacids — space out with other medicines by 2 hours.' },
+
+  { id:10, name:'Demustal',           type:'Tablet',         cat:'Digestive',
+    desc:'Controls nausea and vomiting caused by illness, food poisoning or travel.',
+    treats:['Vomiting','Nausea','Food Poisoning'],
+    adultDose:'1 tablet 3 times a day', childDose:'Half tablet 3 times a day (6-12 yrs)',
+    freq:'3 times a day', food:'30 minutes before meals',
+    warning:'May cause drowsiness. Do not drive. Not recommended under 6 years.' },
+
+  { id:11, name:'Doxinate',           type:'Tablet',         cat:'Digestive',
+    desc:'Prevents nausea and motion sickness. Contains vitamin B6 and antihistamine.',
+    treats:['Nausea','Motion Sickness','Travel Sickness'],
+    adultDose:'1 tablet 30 minutes before travel or at bedtime',
+    childDose:'Not recommended under 12 years',
+    freq:'Once daily or before travel', food:'With or without food',
+    warning:'Causes significant drowsiness — do not drive. Not for children under 12.' },
+
+  { id:12, name:'Fklina',             type:'Tablet',         cat:'Respiratory',
+    desc:'Combination tablet for cold and cough. Reduces runny nose, sneezing and throat irritation.',
+    treats:['Cold','Cough','Runny Nose','Sneezing'],
+    adultDose:'1 tablet every 8 hours', childDose:'Half tablet every 8 hours (6-12 yrs)',
+    freq:'3 times a day', food:'After food',
+    warning:'Causes drowsiness — do not drive. Avoid alcohol. Not for under 6 years.' },
+
+  { id:13, name:'Herperax',           type:'Ointment',       cat:'Skin',
+    desc:'Antiviral ointment for cold sores and herpes-related skin infections around the lips.',
+    treats:['Cold Sores','Herpes Infection','Lip Blisters'],
+    adultDose:'Apply thin layer on affected area', childDose:'Apply thin layer (adult supervision)',
+    freq:'5 times a day for 5 days', food:'Not applicable',
+    warning:'For external use only. Do not apply inside mouth. Wash hands after applying.' },
+
+  { id:14, name:'Immodium',           type:'Tablet',         cat:'Digestive',
+    desc:'Loperamide — quickly stops loose motions by slowing down the bowel.',
+    treats:['Loose Motions','Diarrhoea','Travellers Diarrhoea'],
+    adultDose:'2 tablets initially, then 1 after each loose stool. Max 8/day',
+    childDose:'1 tablet initially, then half after each stool (6-12 yrs). Max 3/day',
+    freq:'After each loose stool', food:'With or without food',
+    warning:'Stop if no improvement in 48 hours — see a doctor. Not for under 6 years. Drink plenty of fluids.' },
+
+  { id:15, name:'Ibugesic Plus',      type:'Syrup',          cat:'Pain & Fever',
+    desc:'Ibuprofen syrup — gentle pain and fever relief especially suitable for children.',
+    treats:['Fever','Pain','Body Ache','Headache'],
+    adultDose:'Not typically used for adults — use tablet form',
+    childDose:'5ml per 10kg body weight every 6-8 hours. Max 3 doses/day',
+    freq:'Every 6-8 hours', food:'After food — important',
+    warning:'Always give after food. Not for under 6 months. Do not give to a dehydrated child.' },
+
+  { id:16, name:'Iodex',              type:'Ointment',       cat:'First Aid',
+    desc:'Massage ointment with methyl salicylate. Relieves muscle pain, joint pain and sprains.',
+    treats:['Muscle Pain','Sprain','Joint Pain','Back Pain','Stiffness'],
+    adultDose:'Massage gently on affected area', childDose:'Use sparingly, adult supervision (6+ yrs)',
+    freq:'2-3 times a day', food:'Not applicable',
+    warning:'For external use only. Keep away from eyes and open wounds. Do not use on broken skin.' },
+
+  { id:17, name:'Dolo 600',           type:'Tablet',         cat:'Pain & Fever',
+    desc:'Paracetamol 650mg — stronger fever relief for adults. Works within 30-45 minutes.',
+    treats:['High Fever','Fever','Headache','Pain'],
+    adultDose:'1 tablet every 4-6 hours. Max 4 tablets/day',
+    childDose:'Not recommended for children — use Crocin syrup instead',
+    freq:'Every 4-6 hours as needed', food:'With or without food',
+    warning:'Adults only. Do not combine with Crocin — both contain paracetamol. Max 4 in 24 hours.' },
+
+  { id:18, name:'Milk of Magnesia',   type:'Syrup',          cat:'Digestive',
+    desc:'Gentle antacid and laxative. Relieves acidity, heartburn and constipation.',
+    treats:['Acidity','Constipation','Heartburn','Upset Stomach'],
+    adultDose:'15-30ml at bedtime or as directed', childDose:'5-15ml at bedtime (6-12 yrs)',
+    freq:'Once at bedtime or as needed', food:'Can be taken any time',
+    warning:'Do not use daily for more than 1 week. May cause loose stools. Shake well before use.' },
+
+  { id:19, name:'Myospaz',            type:'Tablet',         cat:'Pain & Fever',
+    desc:'Muscle relaxant. Relieves painful muscle spasms in the back, neck and shoulders.',
+    treats:['Muscle Spasm','Back Pain','Neck Pain','Shoulder Pain','Muscle Pain'],
+    adultDose:'1 tablet 3 times a day', childDose:'Not recommended for children',
+    freq:'3 times a day', food:'After food',
+    warning:'Causes drowsiness — do not drive. Adults only. Do not take alcohol.' },
+
+  { id:20, name:'Nutrolin B Plus',    type:'Capsule',        cat:'Supplements',
+    desc:'Vitamin B Complex supplement. Replenishes B vitamins depleted by travel, illness or stress.',
+    treats:['Vitamin Deficiency','Fatigue','Low Energy','Recovery'],
+    adultDose:'1 capsule once a day', childDose:'1 capsule once a day (as advised)',
+    freq:'Once daily', food:'After food',
+    warning:'Generally safe. Urine may turn yellow — this is normal.' },
+
+  { id:21, name:'Otrivin',            type:'Nasal Spray',    cat:'Respiratory',
+    desc:'Decongestant nasal spray. Unblocks a stuffy nose within seconds.',
+    treats:['Blocked Nose','Nasal Congestion','Stuffy Nose','Sinusitis'],
+    adultDose:'2-3 sprays in each nostril', childDose:'1 spray in each nostril (child formula)',
+    freq:'Max 3 times a day', food:'Not applicable',
+    warning:'Do not use for more than 3 consecutive days — causes rebound congestion. Use child formula for under 12.' },
+
+  { id:22, name:'Pudin Hara',         type:'Capsule',        cat:'Digestive',
+    desc:'Natural peppermint oil capsule. Relieves gas, bloating, acidity and indigestion.',
+    treats:['Indigestion','Gas','Bloating','Acidity','Stomach Discomfort'],
+    adultDose:'1-2 capsules after meals', childDose:'1 capsule after meals (6+ yrs)',
+    freq:'After each meal as needed', food:'After food',
+    warning:'Generally very safe. May cause mild cooling sensation. Not for infants.' },
+
+  { id:23, name:'Recofast Plus',      type:'Tablet',         cat:'Respiratory',
+    desc:'Combination tablet for cold — relieves runny nose, sneezing and mild fever together.',
+    treats:['Cold','Runny Nose','Sneezing','Mild Fever','Congestion'],
+    adultDose:'1 tablet every 6-8 hours', childDose:'Half tablet every 8 hours (6-12 yrs)',
+    freq:'3 times a day, max 3 days', food:'After food',
+    warning:'Causes drowsiness. Do not drive. Not for under 6 years. Do not exceed 3 days use.' },
+
+  { id:24, name:'Roko',               type:'Tablet',         cat:'Digestive',
+    desc:'Treats dysentery and severe loose motions. Reduces frequency and cramping.',
+    treats:['Dysentery','Loose Motions','Stomach Infection','Diarrhoea with Blood'],
+    adultDose:'1 tablet 3 times a day for 3-5 days', childDose:'As prescribed by doctor',
+    freq:'3 times a day', food:'After food',
+    warning:'See a doctor if blood in stools. Drink plenty of fluids. Complete the full course.' },
+
+  { id:25, name:'Vicks',              type:'Ointment',       cat:'Respiratory',
+    desc:'Vapour rub applied to chest and back to ease cold, cough and blocked breathing at night.',
+    treats:['Cold','Cough','Blocked Nose','Congestion','Chest Tightness'],
+    adultDose:'Rub on chest, throat and back', childDose:'Rub on chest and back only (not face)',
+    freq:'2-3 times a day, especially at bedtime', food:'Not applicable',
+    warning:'External use only. Do not apply under the nose of children under 2. Keep away from eyes and mouth.' },
+
+  { id:26, name:'Zinda Tilasmath',    type:'Drops',          cat:'First Aid',
+    desc:'Ayurvedic multipurpose drops. Works for headache, cold, nasal congestion and insect bites.',
+    treats:['Headache','Cold','Nasal Congestion','Insect Bite','Body Ache'],
+    adultDose:'2-3 drops inhaled or applied', childDose:'1-2 drops (adult supervision)',
+    freq:'As needed', food:'Not applicable',
+    warning:'For external use — inhale or apply on forehead/temples. Do not swallow. Keep away from eyes.' },
+
+  { id:27, name:'Zole F',             type:'Ointment',       cat:'Skin',
+    desc:"Treats stubborn fungal infections — athlete's foot, ringworm and rashes from moisture.",
+    treats:["Fungal Infection","Athlete's Foot","Ringworm","Skin Rash","Itching"],
+    adultDose:'Apply thin layer on affected area', childDose:'Apply thin layer (adult supervision)',
+    freq:'Twice a day for 2-4 weeks', food:'Not applicable',
+    warning:'Continue use for full prescribed duration even if symptoms improve. For external use only.' },
+
+  { id:28, name:'Doxy',               type:'Tablet',         cat:'Antibiotics',
+    desc:'Doxycycline — broad antibiotic for bacterial infections. Prescription required.',
+    treats:['Bacterial Infection','Chest Infection','Skin Infection','Urinary Infection'],
+    adultDose:'100mg once or twice daily as prescribed', childDose:'Not for children under 8 years',
+    freq:'As prescribed by doctor', food:'After food — take with full glass of water',
+    warning:'PRESCRIPTION ONLY. Complete the full course. Do not lie down for 30 mins after taking. May cause sun sensitivity.' },
+
+  { id:29, name:'Augmentine Duo 625', type:'Tablet',         cat:'Antibiotics',
+    desc:'Amoxicillin + Clavulanate — strong antibiotic for respiratory, dental and skin infections.',
+    treats:['Bacterial Infection','Throat Infection','Dental Infection','Chest Infection','Skin Infection'],
+    adultDose:'1 tablet every 8-12 hours as prescribed', childDose:'Dose by weight as prescribed by doctor',
+    freq:'Every 8-12 hours', food:'At the start of a meal — reduces stomach upset',
+    warning:'PRESCRIPTION ONLY. Complete full course — stopping early causes resistance. May cause diarrhoea.' },
+
+  { id:30, name:'Azee',               type:'Tablet',         cat:'Antibiotics',
+    desc:'Azithromycin — antibiotic for throat, chest and ear infections.',
+    treats:['Throat Infection','Tonsillitis','Chest Infection','Ear Infection','Sore Throat'],
+    adultDose:'500mg once daily for 3-5 days as prescribed', childDose:'Dose by weight as prescribed',
+    freq:'Once daily', food:'1 hour before or 2 hours after food',
+    warning:'PRESCRIPTION ONLY. Complete the full course even if you feel better after 1-2 days.' },
+
+  { id:31, name:'Enzoflam',           type:'Tablet',         cat:'Pain & Fever',
+    desc:'Anti-inflammatory for toothache, dental pain, earache and post-surgery swelling.',
+    treats:['Toothache','Dental Pain','Earache','Swelling','Inflammation','Pain'],
+    adultDose:'1 tablet every 8-12 hours', childDose:'Not recommended for children',
+    freq:'2-3 times a day', food:'After food — important',
+    warning:'Adults only. Take after food. Not for stomach ulcer patients. Short-term use only.' },
+
+  { id:32, name:'Alex',               type:'Syrup',          cat:'Respiratory',
+    desc:'Soothes sore throat and suppresses dry cough. Contains antihistamine and cough suppressant.',
+    treats:['Sore Throat','Dry Cough','Cough','Throat Irritation'],
+    adultDose:'10ml 3 times a day', childDose:'5ml 3 times a day (6-12 yrs)',
+    freq:'3 times a day', food:'After food',
+    warning:'Causes drowsiness — do not drive. Avoid alcohol. Not recommended under 6 years.' },
+
+  { id:33, name:'Allegra 180',        type:'Tablet',         cat:'Allergy',
+    desc:'Fexofenadine — non-drowsy antihistamine for allergies, hay fever and hives.',
+    treats:['Allergy','Hay Fever','Sneezing','Runny Nose','Hives','Skin Rash','Itching'],
+    adultDose:'1 tablet once daily', childDose:'Half tablet once daily (6-12 yrs)',
+    freq:'Once daily', food:'With or without food. Avoid fruit juice — reduces absorption.',
+    warning:'Generally non-drowsy. Avoid grapefruit or orange juice with this tablet. Not for under 6 years.' },
+
+  { id:34, name:'Enterogermina',      type:'Capsule',        cat:'Digestive',
+    desc:'Probiotic — restores healthy gut bacteria after stomach infections or antibiotics.',
+    treats:['Stomach Infection','After Antibiotics','Gut Health','Loose Motions','Recovery'],
+    adultDose:'1-2 capsules 2-3 times a day', childDose:'1 capsule 2-3 times a day',
+    freq:'2-3 times a day', food:'With or without food',
+    warning:'Generally very safe. Refrigerate after opening. Can be given alongside antibiotics (space by 2 hours).' },
+
+  { id:35, name:'Lanzol', type:'Capsule', cat:'Digestive',
+    desc:'Lansoprazole — reduces stomach acid production. Used for acidity, GERD, ulcers and heartburn that does not respond to regular antacids.',
+    treats:['Acidity','GERD','Heartburn','Stomach Ulcer','Reflux','Indigestion'],
+    adultDose:'1 capsule (15mg or 30mg) once daily in the morning',
+    childDose:'As prescribed by doctor only — not for self-medication in children',
+    freq:'Once daily, usually for 4-8 weeks', food:'30 minutes BEFORE breakfast — important for it to work',
+    warning:'Do not crush or chew — swallow whole. Do not take for more than 8 weeks without doctor advice. Long term use needs monitoring.' },
+
+  { id:36, name:'Volini',             type:'Spray / Gel',    cat:'First Aid',
+    desc:'Diclofenac — fast-acting anti-inflammatory spray and gel for sprains, muscle pulls, joint pain and sports injuries. Absorbs quickly through the skin.',
+    treats:['Sprain','Muscle Pull','Muscle Pain','Joint Pain','Sports Injury','Swelling','Back Pain','Shoulder Pain'],
+    adultDose:'Spray or apply gel on affected area and massage gently',
+    childDose:'Not recommended for children under 12 years',
+    freq:'3-4 times a day for up to 7 days', food:'Not applicable — external use only',
+    warning:'For external use only. Do not apply on open wounds, broken skin or eyes. Wash hands after applying. Do not use for more than 7 days without doctor advice. Stop if skin redness or rash develops.' },
+
+  { id:37, name:'ORS',                type:'Powder / Sachet', cat:'Digestive',
+    desc:'Oral Rehydration Salts — the single most important treatment for vomiting and diarrhoea. Replaces water, salt and sugar lost from the body. Every doctor asks for this first.',
+    treats:['Vomiting','Diarrhoea','Loose Motions','Dehydration','Travel Sickness','Heat Exhaustion'],
+    adultDose:'1 sachet dissolved in 1 litre of clean water. Drink throughout the day.',
+    childDose:'1 sachet dissolved in 1 litre of clean water. Give small sips frequently — do not give in large amounts at once.',
+    freq:'After every episode of vomiting or loose motion', food:'Not applicable',
+    warning:'Always use clean or boiled water. Discard prepared solution after 24 hours. If vomiting continues for more than 24 hours in a child — see a doctor immediately.' },
+];
+
+// ── Symptom to medicines map ──────────────────────────────────────────────────
+
+// Sort medicines alphabetically
+MEDS.sort(function(a,b){ return a.name.localeCompare(b.name); });
+
+// ── Generic names — use these at any pharmacy abroad ─────────────────────────
+var GENERICS = {
+  1:'Ambroxol',
+  2:'Salbutamol',
+  3:'Povidone-Iodine',
+  4:'Clotrimazole + Beclomethasone',
+  5:'Ciprofloxacin',
+  6:'Ibuprofen + Paracetamol',
+  7:'Paracetamol (Acetaminophen)',
+  8:'Dicyclomine',
+  9:'Aluminium Hydroxide + Magnesium Hydroxide',
+  10:'Domperidone',
+  11:'Doxylamine + Pyridoxine (Vitamin B6)',
+  12:'Cetirizine + Paracetamol + Phenylephrine',
+  13:'Acyclovir',
+  14:'Loperamide',
+  15:'Ibuprofen',
+  16:'Methyl Salicylate',
+  17:'Paracetamol (Acetaminophen) 650mg',
+  18:'Magnesium Hydroxide',
+  19:'Dicyclomine + Paracetamol',
+  20:'Vitamin B Complex',
+  21:'Xylometazoline',
+  22:'Peppermint Oil',
+  23:'Paracetamol + Phenylephrine + Chlorpheniramine',
+  24:'Racecadotril',
+  25:'Camphor + Menthol + Eucalyptus Oil',
+  26:'Herbal / Ayurvedic preparation',
+  27:'Fluconazole + Tinidazole',
+  28:'Doxycycline',
+  29:'Amoxicillin + Clavulanic Acid',
+  30:'Azithromycin',
+  31:'Diclofenac + Paracetamol + Serratiopeptidase',
+  32:'Chlorpheniramine + Dextromethorphan',
+  33:'Fexofenadine',
+  34:'Bacillus clausii (Probiotic)',
+  35:'Lansoprazole',
+  36:'Diclofenac',
+  37:'Oral Rehydration Salts (Sodium + Potassium + Glucose)',
+};
+
+const SYMPTOMS = [
+  { emoji:'🌡️', label:'Fever',           meds:[7,17,6,15] },
+  { emoji:'🤕', label:'Headache',         meds:[7,6,17] },
+  { emoji:'😣', label:'Body Ache',        meds:[6,19,15] },
+  { emoji:'🤢', label:'Nausea',           meds:[37,11,10] },
+  { emoji:'🤮', label:'Vomiting',         meds:[37,10,11] },
+  { emoji:'💩', label:'Loose Motions',    meds:[37,14,24,34] },
+  { emoji:'😖', label:'Stomach Ache',     meds:[8,22,9] },
+  { emoji:'🫧', label:'Acidity / Gas',    meds:[9,22,18] },
+  { emoji:'😮‍💨', label:'Blocked Nose',    meds:[21,25,26] },
+  { emoji:'🤧', label:'Cold / Sneezing',  meds:[23,12,33] },
+  { emoji:'😮', label:'Cough',            meds:[1,32,12] },
+  { emoji:'🗣️', label:'Sore Throat',      meds:[32,30,29] },
+  { emoji:'🦷', label:'Toothache',        meds:[31,6] },
+  { emoji:'👁️', label:'Eye Irritation',   meds:[5] },
+  { emoji:'💪', label:'Muscle Pain',      meds:[36,19,16,6] },
+  { emoji:'🦶', label:'Sprain',           meds:[36,16,6] },
+  { emoji:'🩹', label:'Cut / Wound',      meds:[3,5] },
+  { emoji:'🍄', label:'Fungal Rash',      meds:[4,27] },
+  { emoji:'🤧', label:'Allergy',          meds:[33] },
+  { emoji:'😴', label:'After Antibiotics',meds:[34] },
+];
+
+const CATEGORIES = ['All','Pain & Fever','Digestive','Respiratory','First Aid','Skin','Eyes & Ears','Allergy','Antibiotics','Supplements'];
+
+const CAT_COLOR = {
+  'Pain & Fever':'#E53935','Digestive':'#2E7D32','Respiratory':'#1565C0',
+  'First Aid':'#E65100','Skin':'#6A1B9A','Eyes & Ears':'#00838F',
+  'Allergy':'#F57F17','Antibiotics':'#4E342E','Supplements':'#558B2F',
+};
+
+// ── Destination / Travel data ─────────────────────────────────────────────────
+const DESTINATIONS = [
+  { id:'hill',   label:'Hill Station',     emoji:'🏔️', desc:'Cold weather, altitude, trekking' },
+  { id:'beach',  label:'Beach',            emoji:'🏖️', desc:'Heat, humidity, sand and sea' },
+  { id:'abroad', label:'Abroad',           emoji:'✈️', desc:'International travel' },
+  { id:'city',   label:'City / Road Trip', emoji:'🚗', desc:'Domestic urban travel' },
+];
+
+function buildKit(numKids, kidAges, adults, days, dest) {
+  const hasToddler  = kidAges.some(function(a){ return a <= 4; });
+  const hasSmallKid = kidAges.some(function(a){ return a <= 10; });
+  const longTrip    = days > 7;
+  const isHill      = dest === 'hill';
+  const isBeach     = dest === 'beach';
+  const isAbroad    = dest === 'abroad';
+  const fQty        = longTrip ? '10' : '6';
+  const sQty        = longTrip ? '8'  : '6';
+  var sections = [
+    { section:'🌡️ Fever & Pain', items:[
+      { name:'Crocin',    type: hasToddler ? 'Syrup + Tablet':'Tablet', qty: hasToddler ? '1 syrup + 10 tablets':'10 tablets', desc:'Brings down fever and relieves headache. Safe for all ages.' },
+      { name:'Dolo 600',  type:'Tablet', qty: fQty+' tablets', desc:'Stronger fever relief for adults. Works within 30-45 minutes.' },
+      { name:'Combiflam', type:'Tablet', qty: fQty+' tablets', desc:'Reduces pain, swelling and fever together. Good for body ache.' },
+      { name:'Myospaz',   type:'Tablet', qty:'6 tablets',      desc:'Relaxes muscle spasms after long journeys.' },
+    ]},
+    { section:'🤢 Stomach & Digestion', items:[
+      { name:'Cyclopam',         type:'Tablet',  qty: sQty+' tablets', desc:'Relieves stomach cramps from new food or water.' },
+      { name:'Digene',           type:'Tablet',  qty:'10 tablets',     desc:'Neutralises stomach acid and relieves acidity from eating out.' },
+      { name:'Doxinate',         type:'Tablet',  qty:'8 tablets',      desc:'Prevents nausea and motion sickness on journeys.' },
+      { name:'Immodium',         type:'Tablet',  qty: sQty+' tablets', desc:'Quickly stops loose motions.' },
+      { name:'Roko',             type:'Tablet',  qty:'6 tablets',      desc:'Treats dysentery and severe stomach infections.' },
+      { name:'Enterogermina',    type:'Capsule', qty:'6 capsules',     desc:'Restores good gut bacteria after stomach bugs.' },
+      { name:'Milk of Magnesia', type:'Syrup',   qty:'1 small bottle', desc:'Relieves constipation and acidity.' },
+    ]},
+    { section:'🤧 Cold, Cough & Nose', items:[
+      { name:'Recofast Plus', type:'Tablet',      qty:'8 tablets',   desc:'All-in-one cold relief for runny nose and mild fever.' },
+      { name:'Otrivin',       type:'Nasal Spray', qty:'1 spray',     desc:'Unblocks stuffy nose instantly. Children sleep better.' },
+      { name:'Adusol',        type:'Syrup',       qty:'1 bottle',    desc:'Relieves cough. Hard to find in remote areas.' },
+      { name:'Vicks',         type:'Ointment',    qty:'1 small jar', desc:'Apply on chest and back to ease cold at night.' },
+    ]},
+    { section:'🩹 First Aid & Skin', items:[
+      { name:'Betadine',        type:'Ointment',  qty:'1 tube',         desc:'Cleans and protects cuts and wounds.' },
+      { name:'Iodex',           type:'Ointment',  qty:'1 tube',         desc:'For sprains, joint pain and muscle soreness.' },
+      { name:'Ciplox',          type:'Eye Drops', qty:'1 bottle',       desc: isBeach ? 'For eye irritation from sand and salt water.' : 'For eye irritation from dust and pollution.' },
+      { name:'Zinda Tilasmath', type:'Drops',     qty:'1 small bottle', desc:'Ayurvedic drops for headache, cold and insect bites.' },
+    ]},
+    { section:'💊 Antibiotics — Doctor First!', items:[
+      { name:'Augmentine Duo 625', type:'Tablet', qty:'Only if prescribed', desc:'Never take without a doctor prescribing it.' },
+    ]},
+  ];
+  if (hasSmallKid) sections[0].items.splice(3,0,{ name:'Ibugesic Plus', type:'Syrup', qty:'1 bottle', desc:'Gentle fever syrup for children.' });
+  if (isHill)      { sections[0].items.push({ name:'Enzoflam', type:'Tablet', qty:'6 tablets', desc:'Muscle soreness from trekking and toothache.' });
+                     sections[2].items.push({ name:'Fklina', type:'Tablet', qty:'8 tablets', desc:'Stronger cold and cough for hill weather.' }); }
+  if (isHill||isAbroad) sections[2].items.push({ name:'Alex', type:'Syrup', qty:'1 bottle', desc:'Soothes sore throat from dry or cold air.' });
+  if (isAbroad)    { sections[2].items.push({ name:'Allegra 180', type:'Tablet', qty:'10 tablets', desc:'For unexpected allergies in new environments.' });
+                     sections[2].items.push({ name:'Azee', type:'Tablet', qty:'6 tablets', desc:'Throat infections — pharmacies abroad are expensive.' });
+                     sections[3].items.push({ name:'Zole F', type:'Ointment', qty:'1 tube', desc:'Fungal infections in wet conditions.' });
+                     sections[4].items.push({ name:'Doxy', type:'Tablet', qty:'Only if prescribed', desc:'Ask your doctor before travelling abroad.' }); }
+  if (isBeach)     { sections[3].items.push({ name:'Candid B', type:'Ointment', qty:'1 tube', desc:'Fungal rashes from humidity and sweat.' });
+                     sections[3].items.push({ name:'Zole F', type:'Ointment', qty:'1 tube', desc:'Fungal infections in wet beach conditions.' }); }
+  if (longTrip)    sections.push({ section:'🌿 Supplements', items:[{ name:'Nutrolin B Plus', type:'Capsule', qty:'1 per day', desc:'Replenishes Vitamin B from travel stress.' }]});
+  return sections;
+}
+
+// ── Shared UI pieces ──────────────────────────────────────────────────────────
+function Stepper(props) {
+  return h('div', { style:{ display:'flex', alignItems:'center' } },
+    h('button', { onClick:function(){ props.onChange(Math.max(1, props.value-1)); },
+      style:{ width:42, height:42, borderRadius:'10px 0 0 10px', border:'1.5px solid '+C.border,
+        borderRight:'none', background:C.card, color:C.text, fontSize:22, fontWeight:'700' } }, '−'),
+    h('div', { style:{ width:52, height:42, border:'1.5px solid '+C.border, background:C.card2,
+      display:'flex', alignItems:'center', justifyContent:'center', fontSize:16, fontWeight:'700', color:C.text } }, props.value),
+    h('button', { onClick:function(){ props.onChange(Math.min(18, props.value+1)); },
+      style:{ width:42, height:42, borderRadius:'0 10px 10px 0', border:'1.5px solid '+C.border,
+        borderLeft:'none', background:C.card, color:C.text, fontSize:22, fontWeight:'700' } }, '+')
+  );
+}
+
+function Badge(props) {
+  var col = CAT_COLOR[props.cat] || C.textMid;
+  return h('span', { style:{ fontSize:10, fontWeight:'700', color:'#fff', background:col,
+    padding:'3px 8px', borderRadius:20, whiteSpace:'nowrap', flexShrink:0 } }, props.cat || props.label);
+}
+
+function TypeBadge(props) {
+  return h('span', { style:{ fontSize:10, fontWeight:'700', color:C.text, background:C.yellow,
+    padding:'3px 10px', borderRadius:20, whiteSpace:'nowrap', flexShrink:0 } }, props.type);
+}
+
+function Card(props) {
+  return h('div', { style:{ background:C.card, borderRadius:16, padding:'20px 18px',
+    marginBottom:14, border:'1px solid '+C.border } }, props.children);
+}
+
+function SectionLabel(props) {
+  return h('div', { style:{ fontSize:11, color:C.textSoft, fontWeight:'700',
+    letterSpacing:'0.07em', textTransform:'uppercase', marginBottom:14 } }, props.text);
+}
+
+function ChoiceBtn(props) {
+  return h('button', { onClick:props.onClick, style:{
+    padding:'10px 16px', borderRadius:10,
+    border:'2px solid '+(props.active ? C.text : C.border),
+    background: props.active ? C.yellow : C.card,
+    color: C.text, fontSize:14, fontWeight: props.active ? '700':'400',
+  }}, props.label);
+}
+
+function BigBtn(props) {
+  return h('button', { onClick:props.disabled ? null : props.onClick, style:{
+    flex:1, padding:15, borderRadius:12,
+    background: props.disabled ? C.border : C.yellow,
+    color: props.disabled ? C.textSoft : C.text,
+    border:'none', fontSize:15, fontWeight:'700',
+    opacity: props.disabled ? 0.5 : 1,
+    boxShadow: props.disabled ? 'none' : '0 3px 12px rgba(0,0,0,0.12)',
+  }}, props.label);
+}
+
+function BackBtn(props) {
+  return h('button', { onClick:props.onClick, style:{
+    flex:1, padding:15, borderRadius:12, background:C.card,
+    color:C.textMid, border:'2px solid '+C.border, fontSize:15, fontWeight:'700',
+  }}, '← Back');
+}
+
+function Note(props) {
+  return h('div', { style:{ background:'#FFF9C4', borderRadius:14, padding:'14px 16px',
+    border:'1px solid '+C.yellow, marginBottom:14 } },
+    h('p', { style:{ fontSize:12, color:C.textMid, lineHeight:1.7, margin:0 } }, props.text));
+}
+
+// ── Detail Modal ──────────────────────────────────────────────────────────────
+function DetailModal(props) {
+  var med = props.med;
+  if (!med) return null;
+  var col = CAT_COLOR[med.cat] || C.textMid;
+  return h('div', { onClick:props.onClose, style:{
+    position:'fixed', top:0, left:0, right:0, bottom:0, zIndex:1000,
+    background:'rgba(0,0,0,0.5)', display:'flex', alignItems:'flex-end' } },
+    h('div', { onClick:function(e){ e.stopPropagation(); }, style:{
+      background:C.card, borderRadius:'20px 20px 0 0', padding:'0 0 40px 0',
+      width:'100%', maxHeight:'85vh', overflowY:'auto' } },
+      // Handle bar
+      h('div', { style:{ display:'flex', justifyContent:'center', padding:'12px 0 6px' } },
+        h('div', { style:{ width:40, height:4, borderRadius:2, background:C.border } })
+      ),
+      // Header
+      h('div', { style:{ padding:'12px 20px 16px', borderBottom:'1px solid '+C.border } },
+        h('div', { style:{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:10 } },
+          h('div', { style:{ flex:1 } },
+            h('h2', { style:{ fontSize:20, fontWeight:'700', color:C.text, margin:'0 0 6px' } }, med.name),
+            h('div', { style:{ display:'flex', gap:6, flexWrap:'wrap' } },
+              h(TypeBadge, { type:med.type }),
+              h('span', { style:{ fontSize:10, fontWeight:'700', color:'#fff', background:col,
+                padding:'3px 8px', borderRadius:20 } }, med.cat)
+            )
           ),
-          props.showQty && props.qty && h('div', { style:{ fontSize:12, color:'#8E8E93', fontWeight:'700', marginTop:5 } }, 'Qty: '+props.qty),
-          h('div', { style:{ fontSize:13, color:C.textMid, marginTop:6, lineHeight:1.65 } }, props.desc)
+          h('div', { style:{ display:'flex', gap:8 } },
+          med.custom && h('button', { onClick:function(){ props.onDelete && props.onDelete(med.id); }, style:{ background:C.redBg, border:'1px solid '+C.red, borderRadius:10, padding:'6px 12px', fontSize:12, fontWeight:'700', color:C.red, cursor:'pointer' } }, 'Delete'),
+          h('button', { onClick:props.onClose, style:{ background:'#F2F2F7', border:'none',
+            borderRadius:'50%', width:32, height:32, fontSize:18, color:C.textMid,
+            display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 } }, '×')
         )
-      );
-    }
+        ),
+        h('p', { style:{ fontSize:13, color:C.textMid, lineHeight:1.6, margin:'12px 0 0' } }, med.desc),
+        GENERICS[med.id] && h('div', { style:{ marginTop:10, background:'#FFF9C4', borderRadius:10,
+          padding:'8px 12px', border:'1px solid '+C.yellow } },
+          h('span', { style:{ fontSize:11, fontWeight:'700', color:C.textMid, letterSpacing:'0.05em' } }, 'GENERIC NAME  '),
+          h('span', { style:{ fontSize:13, color:C.text, fontWeight:'700' } }, GENERICS[med.id]),
+          h('div', { style:{ fontSize:11, color:C.textSoft, marginTop:3 } }, 'Ask for this name at any pharmacy abroad')
+        )
+      ),
+      // Info rows
+      h('div', { style:{ padding:'0 20px' } },
+        InfoRow('💊', 'Adult Dose', med.adultDose),
+        InfoRow('👶', 'Child Dose', med.childDose),
+        InfoRow('🕐', 'Frequency', med.freq),
+        InfoRow('🍽️', 'Food', med.food),
+        h('div', { style:{ background:C.redBg, borderRadius:12, padding:'12px 14px', marginTop:14,
+          border:'1px solid #F5C6C2' } },
+          h('div', { style:{ display:'flex', gap:8, alignItems:'flex-start' } },
+            h('span', { style:{ fontSize:16 } }, '⚠️'),
+            h('div', null,
+              h('div', { style:{ fontSize:11, fontWeight:'700', color:C.red, letterSpacing:'0.05em', marginBottom:4 } }, 'IMPORTANT'),
+              h('div', { style:{ fontSize:13, color:C.red, lineHeight:1.6 } }, med.warning)
+            )
+          )
+        )
+      )
+    )
+  );
+}
 
-    function ChoiceBtn(props) {
-      return h('button', {
-        onClick: props.onClick,
-        style:{ padding:'10px 16px', borderRadius:10,
-          border:'2px solid '+(props.active ? C.orange : C.border),
-          background: props.active ? C.orange : C.card,
-          color: props.active ? '#1C1C1E' : C.textMid,
-          fontSize:14, fontWeight: props.active ? '700':'400' }
-      }, props.label);
-    }
+function InfoRow(emoji, label, value) {
+  return h('div', { style:{ display:'flex', gap:12, alignItems:'flex-start', padding:'12px 0',
+    borderBottom:'1px solid '+C.border } },
+    h('span', { style:{ fontSize:18, minWidth:26 } }, emoji),
+    h('div', { style:{ flex:1 } },
+      h('div', { style:{ fontSize:11, color:C.textSoft, fontWeight:'700', letterSpacing:'0.05em', marginBottom:3 } }, label.toUpperCase()),
+      h('div', { style:{ fontSize:13, color:C.text, lineHeight:1.6 } }, value)
+    )
+  );
+}
 
-    function BigBtn(props) {
-      return h('button', {
-        onClick: props.disabled ? null : props.onClick,
-        style:{ flex:1, padding:15, borderRadius:12,
-          background: props.disabled ? C.border : C.orange,
-          color: props.disabled ? C.textSoft : '#1C1C1E',
-          border:'none', fontSize:15, fontWeight:'700',
-          opacity: props.disabled ? 0.5 : 1,
-          boxShadow: props.disabled ? 'none' : '0 3px 12px rgba(0,0,0,0.15)' }
-      }, props.label);
-    }
+// ── Home Tab ──────────────────────────────────────────────────────────────────
+// ── Add Medicine Modal ───────────────────────────────────────────────────────
+function AddMedModal(props) {
+  var nameState  = useState('');   var name    = nameState[0];   var setName    = nameState[1];
+  var typeState  = useState('Tablet'); var type = typeState[0];  var setType    = typeState[1];
+  var catState   = useState('Digestive'); var cat= catState[0];  var setCat     = catState[1];
+  var descState  = useState('');   var desc    = descState[0];   var setDesc    = descState[1];
+  var doseState  = useState('');   var dose    = doseState[0];   var setDose    = doseState[1];
+  var warnState  = useState('');   var warn    = warnState[0];   var setWarn    = warnState[1];
 
-    function BackBtn(props) {
-      return h('button', {
-        onClick: props.onClick,
-        style:{ flex:1, padding:15, borderRadius:12, background:C.card,
-          color:C.textMid, border:'2px solid '+C.border, fontSize:15, fontWeight:'700' }
-      }, '← Back');
-    }
+  function handleSave() {
+    if (!name.trim()) return;
+    props.onSave({
+      id: 'c_' + Date.now(),
+      name: name.trim(), type: type, cat: cat,
+      desc: desc || 'Custom medicine added by you.',
+      treats: [cat], custom: true,
+      adultDose: dose || 'As directed',
+      childDose: 'Consult your doctor',
+      freq: 'As directed', food: 'As directed',
+      warning: warn || 'Consult your doctor before giving to children.'
+    });
+    setName(''); setType('Tablet'); setCat('Digestive'); setDesc(''); setDose(''); setWarn('');
+  }
 
-    function Card(props) {
-      return h('div', {
-        style:{ background:C.card, borderRadius:16, padding:'20px 18px',
-          marginBottom:14, border:'1px solid '+C.border }
-      }, props.children);
-    }
+  if (!props.visible) return null;
 
-    function SectionTitle(props) {
-      return h('div', {
-        style:{ fontSize:12, color:C.textSoft, fontWeight:'700',
-          letterSpacing:'0.06em', textTransform:'uppercase', marginBottom:14 }
-      }, props.text);
-    }
+  var inputStyle = { width:'100%', padding:'11px 14px', borderRadius:10,
+    border:'1.5px solid '+C.border, background:C.card2, fontSize:14,
+    color:C.text, outline:'none', marginBottom:12 };
 
-    function SummaryBar(props) {
-      return h('div', {
-        style:{ background:'linear-gradient(135deg,'+C.orange+','+C.orangeL+')',
-          borderRadius:16, padding:'16px 20px', marginBottom:16,
-          display:'flex', justifyContent:'space-between', alignItems:'center' }
-      },
+  return h('div', { onClick:props.onClose, style:{
+    position:'fixed', top:0, left:0, right:0, bottom:0, zIndex:1000,
+    background:'rgba(0,0,0,0.5)', display:'flex', alignItems:'flex-end' } },
+    h('div', { onClick:function(e){ e.stopPropagation(); }, style:{
+      background:C.card, borderRadius:'20px 20px 0 0', padding:'0 20px 40px',
+      width:'100%', maxHeight:'90vh', overflowY:'auto' } },
+      h('div', { style:{ display:'flex', justifyContent:'center', padding:'12px 0 6px' } },
+        h('div', { style:{ width:40, height:4, borderRadius:2, background:C.border } })
+      ),
+      h('div', { style:{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 } },
+        h('h2', { style:{ fontSize:18, fontWeight:'700', color:C.text } }, '+ Add Medicine'),
+        h('button', { onClick:props.onClose, style:{ background:'#F2F2F7', border:'none',
+          borderRadius:'50%', width:32, height:32, fontSize:18, color:C.textMid } }, '×')
+      ),
+
+      h('div', { style:{ fontSize:11, color:C.textSoft, fontWeight:'700', letterSpacing:'0.06em', marginBottom:6 } }, 'MEDICINE NAME *'),
+      h('input', { type:'text', placeholder:'e.g. Pantoprazole', value:name,
+        onChange:function(e){ setName(e.target.value); }, style:inputStyle }),
+
+      h('div', { style:{ fontSize:11, color:C.textSoft, fontWeight:'700', letterSpacing:'0.06em', marginBottom:6 } }, 'TYPE'),
+      h('select', { value:type, onChange:function(e){ setType(e.target.value); }, style:inputStyle },
+        ['Tablet','Syrup','Capsule','Ointment','Drops','Spray','Injection','Other'].map(function(t){
+          return h('option', { key:t, value:t }, t);
+        })
+      ),
+
+      h('div', { style:{ fontSize:11, color:C.textSoft, fontWeight:'700', letterSpacing:'0.06em', marginBottom:6 } }, 'CATEGORY'),
+      h('select', { value:cat, onChange:function(e){ setCat(e.target.value); }, style:inputStyle },
+        ['Pain & Fever','Digestive','Respiratory','First Aid','Skin','Eyes & Ears','Allergy','Antibiotics','Supplements','Other'].map(function(c){
+          return h('option', { key:c, value:c }, c);
+        })
+      ),
+
+      h('div', { style:{ fontSize:11, color:C.textSoft, fontWeight:'700', letterSpacing:'0.06em', marginBottom:6 } }, 'WHAT IS IT FOR'),
+      h('input', { type:'text', placeholder:'e.g. Acidity and stomach ulcers', value:desc,
+        onChange:function(e){ setDesc(e.target.value); }, style:inputStyle }),
+
+      h('div', { style:{ fontSize:11, color:C.textSoft, fontWeight:'700', letterSpacing:'0.06em', marginBottom:6 } }, 'DOSE REMINDER (optional)'),
+      h('input', { type:'text', placeholder:'e.g. 1 tablet every morning before food', value:dose,
+        onChange:function(e){ setDose(e.target.value); }, style:inputStyle }),
+
+      h('div', { style:{ fontSize:11, color:C.textSoft, fontWeight:'700', letterSpacing:'0.06em', marginBottom:6 } }, 'NOTES / WARNING (optional)'),
+      h('input', { type:'text', placeholder:'e.g. Do not give to children under 12', value:warn,
+        onChange:function(e){ setWarn(e.target.value); }, style:inputStyle }),
+
+      h('button', { onClick:handleSave, style:{
+        width:'100%', padding:15, borderRadius:12, background: name.trim() ? C.yellow : C.border,
+        color: name.trim() ? C.text : C.textSoft, border:'none', fontSize:15, fontWeight:'700',
+        opacity: name.trim() ? 1 : 0.5,
+      }}, 'Save Medicine')
+    )
+  );
+}
+
+function HomeTab() {
+  var catState    = useState('All');    var activeCat  = catState[0];  var setActiveCat  = catState[1];
+  var modalState  = useState(null);     var modalMed   = modalState[0]; var setModalMed   = modalState[1];
+  var searchState = useState('');       var search     = searchState[0]; var setSearch    = searchState[1];
+  var checkedState= useState({});       var checked    = checkedState[0]; var setChecked  = checkedState[1];
+  var addState    = useState(false);    var showAdd    = addState[0];    var setShowAdd   = addState[1];
+  var customState = useState(function(){
+    try { return JSON.parse(localStorage.getItem('customMeds') || '[]'); } catch(e){ return []; }
+  });
+  var customMeds  = customState[0]; var setCustomMeds = customState[1];
+
+  function handleAddSave(med) {
+    var updated = customMeds.concat([med]);
+    setCustomMeds(updated);
+    try { localStorage.setItem('customMeds', JSON.stringify(updated)); } catch(e){}
+    setShowAdd(false);
+  }
+
+  function handleDelete(id) {
+    var updated = customMeds.filter(function(m){ return m.id !== id; });
+    setCustomMeds(updated);
+    try { localStorage.setItem('customMeds', JSON.stringify(updated)); } catch(e){}
+    setModalMed(null);
+  }
+
+  var allMeds = MEDS.concat(customMeds);
+
+  var filtered = allMeds.filter(function(m) {
+    var matchCat  = activeCat === 'All' || m.cat === activeCat;
+    var matchSearch = !search || m.name.toLowerCase().indexOf(search.toLowerCase()) !== -1
+      || m.treats.some(function(t){ return t.toLowerCase().indexOf(search.toLowerCase()) !== -1; })
+      || m.desc.toLowerCase().indexOf(search.toLowerCase()) !== -1;
+    return matchCat && matchSearch;
+  });
+
+  var hPacked = Object.values(checked).filter(Boolean).length;
+
+  return h(Fragment, null,
+    // Summary bar
+    h('div', { style:{ background:C.yellow, padding:'16px 20px', marginBottom:0 } },
+      h('div', { style:{ display:'flex', justifyContent:'space-between', alignItems:'center' } },
         h('div', null,
-          h('div', { style:{ fontSize:14, fontWeight:'700', color:'#1C1C1E' } }, props.topLine),
-          props.bottomLine && h('div', { style:{ fontSize:12, color:'#3A3A3C', marginTop:4 } }, props.bottomLine)
+          h('div', { style:{ fontSize:15, fontWeight:'700', color:C.text } }, 'Home Medicine Cabinet'),
+          h('div', { style:{ fontSize:12, color:C.textMid, marginTop:3 } }, 'Tap any medicine for full details & dosage')
         ),
-        h('div', { style:{ background:'rgba(0,0,0,0.08)', borderRadius:12, padding:'10px 16px', textAlign:'center' } },
-          h('div', { style:{ fontSize:24, fontWeight:'700', color:'#1C1C1E' } }, props.count),
-          h('div', { style:{ fontSize:11, color:'#3A3A3C' } }, props.label)
+        h('div', { style:{ display:'flex', alignItems:'center', gap:10 } },
+          h('div', { style:{ background:'rgba(0,0,0,0.1)', borderRadius:10, padding:'8px 14px', textAlign:'center' } },
+            h('div', { style:{ fontSize:22, fontWeight:'700', color:C.text } }, hPacked+'/'+allMeds.length),
+            h('div', { style:{ fontSize:11, color:C.textMid } }, 'in cabinet')
+          ),
+          h('button', { onClick:function(){ setShowAdd(true); }, style:{
+            background:C.text, color:C.yellow, border:'none', borderRadius:12,
+            width:42, height:42, fontSize:22, fontWeight:'700', cursor:'pointer',
+            display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 } }, '+')
         )
-      );
-    }
+      )
+    ),
 
-    function Note(props) {
-      return h('div', {
-        style:{ background:'#FFF8E7', borderRadius:14, padding:'14px 16px',
-          border:'1px solid #F0DFA0', marginBottom:14 }
-      }, h('p', { style:{ fontSize:12, color:'#7A6520', lineHeight:1.7, margin:0 } }, props.text));
-    }
+    // Search
+    h('div', { style:{ padding:'12px 16px 0' } },
+      h('input', { type:'text', placeholder:'Search medicine or symptom...', value:search,
+        onChange:function(e){ setSearch(e.target.value); },
+        style:{ width:'100%', padding:'11px 14px', borderRadius:12, border:'1.5px solid '+C.border,
+          background:C.card, fontSize:14, color:C.text, outline:'none' } })
+    ),
 
-    // ── Main App ──────────────────────────────────────────────────────────────
-    function App() {
-      var s = useState;
-      var tabState      = s('travel');   var tab      = tabState[0];   var setTab      = tabState[1];
-      var stepState     = s(0);          var step     = stepState[0];  var setStep     = stepState[1];
-      var numKidsState  = s(1);          var numKids  = numKidsState[0];var setNumKids  = numKidsState[1];
-      var kidAgesState  = s([8]);        var kidAges  = kidAgesState[0];var setKidAges  = kidAgesState[1];
-      var adultsState   = s(2);          var adults   = adultsState[0]; var setAdults   = adultsState[1];
-      var daysState     = s(5);          var days     = daysState[0];   var setDays     = daysState[1];
-      var destState     = s(null);       var dest     = destState[0];   var setDest     = destState[1];
-      var tCheckedState = s({});         var tChecked = tCheckedState[0];var setTChecked= tCheckedState[1];
-      var hCheckedState = s({});         var hChecked = hCheckedState[0];var setHChecked= hCheckedState[1];
+    // Category filter
+    h('div', { style:{ display:'flex', gap:8, overflowX:'auto', padding:'12px 16px 4px',
+      scrollbarWidth:'none' } },
+      CATEGORIES.map(function(cat) {
+        var active = activeCat === cat;
+        var col = CAT_COLOR[cat];
+        return h('button', { key:cat, onClick:function(){ setActiveCat(cat); }, style:{
+          flexShrink:0, padding:'7px 14px', borderRadius:20, fontSize:12, fontWeight:'700',
+          border:'2px solid '+(active ? (col||C.text) : C.border),
+          background: active ? (col||C.text) : C.card,
+          color: active ? '#fff' : C.textMid,
+          whiteSpace:'nowrap',
+        }}, cat);
+      })
+    ),
 
-      function setKidCount(n) {
-        setNumKids(n);
-        var ages = [];
-        for (var i = 0; i < n; i++) ages.push(kidAges[i] || 8);
-        setKidAges(ages);
-      }
-      function setKidAge(i, v) {
-        var a = kidAges.slice(); a[i] = v; setKidAges(a);
-      }
+    // Medicine list
+    h('div', { style:{ padding:'8px 16px 60px' } },
+      filtered.length === 0 && h('div', { style:{ textAlign:'center', padding:40, color:C.textSoft } }, 'No medicines found.'),
+      filtered.map(function(med) {
+        var isDone = !!checked[med.id];
+        return h('div', { key:med.id, style:{ background:C.card, borderRadius:14, padding:'14px',
+          marginBottom:10, border:'1px solid '+C.border,
+          opacity: isDone ? 0.55 : 1 } },
+          // Top row - tap for detail
+          h('div', { onClick:function(){ setModalMed(med); }, style:{ display:'flex', alignItems:'flex-start', gap:10, cursor:'pointer' } },
+            h('div', { style:{ flex:1, minWidth:0 } },
+              h('div', { style:{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:8 } },
+                h('span', { style:{ fontSize:15, fontWeight:'700', color:C.text } }, med.id+'. '+med.name),
+                h(TypeBadge, { type:med.type })
+              ),
+              h('div', { style:{ display:'flex', gap:6, marginTop:4, flexWrap:'wrap' } },
+                h(Badge, { cat:med.cat }),
+                med.custom && h('span', { style:{ fontSize:10, fontWeight:'700', color:'#fff', background:'#555', padding:'3px 8px', borderRadius:20 } }, '★ My Medicine')
+              ),
+              h('div', { style:{ fontSize:13, color:C.textMid, marginTop:6, lineHeight:1.55 } }, med.desc),
+              // Treats tags
+              h('div', { style:{ display:'flex', gap:5, flexWrap:'wrap', marginTop:8 } },
+                med.treats.slice(0,3).map(function(t) {
+                  return h('span', { key:t, style:{ fontSize:11, color:C.textMid, background:C.card2,
+                    border:'1px solid '+C.border, padding:'2px 8px', borderRadius:20 } }, t);
+                })
+              ),
+              h('div', { style:{ fontSize:11, color:C.textSoft, marginTop:8 } }, 'Tap for dosage & details →')
+            )
+          ),
+          // Checkbox row
+          h('div', { onClick:function(){ setChecked(function(p){ var n=Object.assign({},p); n[med.id]=!n[med.id]; return n; }); },
+            style:{ display:'flex', alignItems:'center', gap:8, marginTop:12, paddingTop:10,
+              borderTop:'1px solid '+C.border, cursor:'pointer' } },
+            h('div', { style:{ width:22, height:22, borderRadius:6, border:'2px solid '+(isDone ? C.green : C.border),
+              background: isDone ? C.green : 'transparent',
+              display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 } },
+              isDone && h('span', { style:{ color:'#fff', fontSize:14 } }, '✓')
+            ),
+            h('span', { style:{ fontSize:12, color:isDone ? C.green : C.textSoft, fontWeight:isDone?'700':'400' } },
+              isDone ? 'In my cabinet ✓' : 'Mark as in cabinet')
+          )
+        );
+      })
+    ),
 
-      var kit      = step === 3 ? buildKit(numKids, kidAges, adults, days, dest) : [];
-      var allItems = kit.reduce(function(acc,s){ return acc.concat(s.items); }, []);
-      var tPacked  = allItems.filter(function(m){ return tChecked[m.name]; }).length;
-      var hPacked  = Object.values(hChecked).filter(Boolean).length;
+    h(DetailModal, { med:modalMed, onClose:function(){ setModalMed(null); },
+      onDelete:handleDelete }),
+    h(AddMedModal, { visible:showAdd, onClose:function(){ setShowAdd(false); }, onSave:handleAddSave })
+  );
+}
 
-      function toggleT(name) { setTChecked(function(p){ var n=Object.assign({},p); n[name]=!n[name]; return n; }); }
-      function toggleH(id)   { setHChecked(function(p){ var n=Object.assign({},p); n[id]=!n[id];     return n; }); }
+// ── Quick Find Tab ────────────────────────────────────────────────────────────
+function QuickFindTab() {
+  var symptomState = useState(null);  var selected = symptomState[0]; var setSelected = symptomState[1];
+  var modalState   = useState(null);  var modalMed = modalState[0];   var setModalMed  = modalState[1];
 
-      return h('div', { style:{ minHeight:'100vh', background:C.bg, paddingBottom:60 } },
+  var results = selected
+    ? selected.meds.map(function(id){ return MEDS.find(function(m){ return m.id === id; }); }).filter(Boolean)
+    : [];
 
-        // Header
-        h('div', { style:{ background:'linear-gradient(135deg,'+C.orange+','+C.orangeL+')',
-          padding:'28px 20px 20px', textAlign:'center' } },
-          h('div', { style:{ fontSize:28, marginBottom:6 } }, '💊 🧳'),
-          h('h1', { style:{ color:'#1C1C1E', fontSize:22, fontWeight:'700', margin:'0 0 4px' } }, 'Family Medicine App'),
-          h('p',  { style:{ color:'#3A3A3C', fontSize:12, margin:0 } }, 'Travel Kit Builder & Home Cabinet')
-        ),
+  return h(Fragment, null,
+    h('div', { style:{ background:C.yellow, padding:'16px 20px' } },
+      h('div', { style:{ fontSize:15, fontWeight:'700', color:C.text } }, 'What is the symptom?'),
+      h('div', { style:{ fontSize:12, color:C.textMid, marginTop:3 } }, 'Tap a symptom to find the right medicine')
+    ),
 
-        // Tabs
-        h('div', { style:{ display:'flex', background:C.tabBg, borderBottom:'2px solid '+C.border } },
-          [{id:'travel',label:'✈️  Travel Kit'},{id:'home',label:'🏠  Home List'}].map(function(t) {
-            return h('button', { key:t.id, onClick:function(){ setTab(t.id); }, style:{
-              flex:1, padding:'14px 10px', border:'none',
-              background: tab===t.id ? C.card : 'transparent',
-              color: tab===t.id ? '#1C1C1E' : C.textSoft,
-              fontSize:14, fontWeight: tab===t.id ? '700':'400',
-              borderBottom:'3px solid '+(tab===t.id ? C.orange:'transparent'),
-            }}, t.label);
+    h('div', { style:{ padding:'12px 16px' } },
+
+      // Symptom grid
+      h('div', { style:{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:10, marginBottom:16 } },
+        SYMPTOMS.map(function(s) {
+          var active = selected && selected.label === s.label;
+          return h('button', { key:s.label, onClick:function(){ setSelected(active ? null : s); }, style:{
+            padding:'12px 8px', borderRadius:14, border:'2px solid '+(active ? C.text : C.border),
+            background: active ? C.yellow : C.card, cursor:'pointer', textAlign:'center',
+          }},
+            h('div', { style:{ fontSize:24, marginBottom:4 } }, s.emoji),
+            h('div', { style:{ fontSize:11, fontWeight:'700', color:C.text, lineHeight:1.3 } }, s.label)
+          );
+        })
+      ),
+
+      // Results
+      selected && h('div', null,
+        h('div', { style:{ fontSize:13, color:C.textSoft, fontWeight:'700', letterSpacing:'0.06em',
+          textTransform:'uppercase', marginBottom:12 } }, 'Medicines for '+selected.label),
+        results.map(function(med, i) {
+          var col = CAT_COLOR[med.cat] || C.textMid;
+          return h('div', { key:med.id, onClick:function(){ setModalMed(med); },
+            style:{ background:C.card, borderRadius:14, padding:'14px', marginBottom:10,
+              border:'2px solid '+(i===0 ? C.yellow : C.border), cursor:'pointer' } },
+            i===0 && h('div', { style:{ fontSize:10, fontWeight:'700', color:C.textMid, background:C.yellow,
+              display:'inline-block', padding:'2px 8px', borderRadius:20, marginBottom:8 } }, '✓ FIRST CHOICE'),
+            h('div', { style:{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:8 } },
+              h('span', { style:{ fontSize:16, fontWeight:'700', color:C.text } }, med.name),
+              h(TypeBadge, { type:med.type })
+            ),
+            h('div', { style:{ marginTop:4 } }, h(Badge, { cat:med.cat })),
+            h('div', { style:{ fontSize:13, color:C.textMid, marginTop:8, lineHeight:1.55 } }, med.desc),
+            h('div', { style:{ fontSize:12, color:C.textMid, marginTop:8, background:'#F9F9F9',
+              borderRadius:8, padding:'8px 10px' } },
+              h('strong', null, 'Adult: '), med.adultDose
+            ),
+            h('div', { style:{ fontSize:12, color:C.textMid, marginTop:4, background:'#F9F9F9',
+              borderRadius:8, padding:'8px 10px' } },
+              h('strong', null, 'Child: '), med.childDose
+            ),
+            h('div', { style:{ fontSize:11, color:C.textSoft, marginTop:8 } }, 'Tap for full details →')
+          );
+        })
+      )
+    ),
+
+    h(DetailModal, { med:modalMed, onClose:function(){ setModalMed(null); } })
+  );
+}
+
+// ── Travel Tab ────────────────────────────────────────────────────────────────
+// Simple travel kit builder - just destination + days
+var SIMPLE_KIT = {
+  base: [
+    { name:'Crocin',          type:'Tablet / Syrup', qty:'10 tablets',    desc:'Fever and headache.' },
+    { name:'Dolo 600',        type:'Tablet',         qty:'6 tablets',     desc:'Stronger fever relief for adults.' },
+    { name:'Combiflam',       type:'Tablet',         qty:'6 tablets',     desc:'Pain, swelling and fever together.' },
+    { name:'Cyclopam',        type:'Tablet',         qty:'6 tablets',     desc:'Stomach cramps from new food.' },
+    { name:'Digene',          type:'Tablet',         qty:'10 tablets',    desc:'Acidity and indigestion.' },
+    { name:'Doxinate',        type:'Tablet',         qty:'8 tablets',     desc:'Nausea and motion sickness.' },
+    { name:'Immodium',        type:'Tablet',         qty:'6 tablets',     desc:'Loose motions.' },
+    { name:'Recofast Plus',   type:'Tablet',         qty:'8 tablets',     desc:'Cold and runny nose.' },
+    { name:'Otrivin',         type:'Nasal Spray',    qty:'1 spray',       desc:'Blocked nose.' },
+    { name:'Adusol',          type:'Syrup',          qty:'1 bottle',      desc:'Cough.' },
+    { name:'Vicks',           type:'Ointment',       qty:'1 small jar',   desc:'Cold and chest congestion.' },
+    { name:'Betadine',        type:'Ointment',       qty:'1 tube',        desc:'Cuts and wounds.' },
+    { name:'Volini',          type:'Spray / Gel',    qty:'1 bottle',      desc:'Sprains and muscle pain.' },
+    { name:'Iodex',           type:'Ointment',       qty:'1 tube',        desc:'Joint pain and soreness.' },
+    { name:'Ciplox',          type:'Eye Drops',      qty:'1 bottle',      desc:'Eye irritation.' },
+    { name:'Zinda Tilasmath', type:'Drops',          qty:'1 small bottle',desc:'Headache, cold and insect bites.' },
+    { name:'ORS',             type:'Powder / Sachet', qty:'5 sachets', desc:'Critical for vomiting and diarrhoea — every doctor asks for this first.' },
+    { name:'Augmentine Duo 625', type:'Tablet',      qty:'Only if prescribed', desc:'Antibiotic — doctor first.' },
+  ],
+  hill:   [
+    { name:'Enzoflam',  type:'Tablet', qty:'6 tablets', desc:'Muscle soreness from trekking.' },
+    { name:'Fklina',    type:'Tablet', qty:'8 tablets', desc:'Cold and cough in cold weather.' },
+    { name:'Alex',      type:'Syrup',  qty:'1 bottle',  desc:'Sore throat from dry cold air.' },
+    { name:'Myospaz',   type:'Tablet', qty:'6 tablets', desc:'Muscle spasms after long treks.' },
+  ],
+  beach:  [
+    { name:'Candid B',  type:'Ointment', qty:'1 tube',   desc:'Fungal rash from humidity and sweat.' },
+    { name:'Zole F',    type:'Ointment', qty:'1 tube',   desc:'Fungal infections in wet conditions.' },
+    { name:'Allegra 180', type:'Tablet',qty:'10 tablets',desc:'Allergies and skin reactions.' },
+  ],
+  abroad: [
+    { name:'Allegra 180', type:'Tablet', qty:'10 tablets',      desc:'Allergies in new environments.' },
+    { name:'Azee',        type:'Tablet', qty:'6 tablets',       desc:'Throat infections — pharmacies abroad are expensive.' },
+    { name:'Alex',        type:'Syrup',  qty:'1 bottle',        desc:'Sore throat and dry cough.' },
+    { name:'Zole F',      type:'Ointment',qty:'1 tube',         desc:'Fungal infections.' },
+    { name:'Doxy',        type:'Tablet', qty:'Only if prescribed', desc:'Antibiotic — ask doctor before travel.' },
+    { name:'ORS',         type:'Powder / Sachet', qty:'5-10 sachets', desc:'Critical for vomiting and diarrhoea. Every doctor asks for this first.' },
+    { name:'Lanzol',      type:'Capsule', qty:'5 capsules', desc:'Acidity and stomach ulcers. Take 30 mins before breakfast.' },
+  ],
+  long: [
+    { name:'Nutrolin B Plus', type:'Capsule', qty:'1 per day', desc:'Vitamin B for long trips.' },
+    { name:'Enterogermina',   type:'Capsule', qty:'6 capsules',desc:'Gut health and stomach recovery.' },
+  ],
+};
+
+function TravelTab() {
+  var destState     = useState(null); var dest     = destState[0];    var setDest     = destState[1];
+  var daysState     = useState(5);    var days     = daysState[0];    var setDays     = daysState[1];
+  var tCheckedState = useState({});   var tChecked = tCheckedState[0]; var setTChecked = tCheckedState[1];
+  var builtState    = useState(false); var built   = builtState[0];   var setBuilt    = builtState[1];
+
+  function getKit() {
+    var items = SIMPLE_KIT.base.slice();
+    if (dest === 'hill')   items = items.concat(SIMPLE_KIT.hill);
+    if (dest === 'beach')  items = items.concat(SIMPLE_KIT.beach);
+    if (dest === 'abroad') items = items.concat(SIMPLE_KIT.abroad);
+    if (days > 7)          items = items.concat(SIMPLE_KIT.long);
+    return items;
+  }
+
+  var kit     = built ? getKit() : [];
+  var tPacked = kit.filter(function(m){ return tChecked[m.name]; }).length;
+  function toggleT(name){ setTChecked(function(p){ var n=Object.assign({},p); n[name]=!n[name]; return n; }); }
+
+  return h('div', { style:{ paddingBottom:40 } },
+
+    // Header
+    h('div', { style:{ background:C.yellow, padding:'16px 20px' } },
+      h('div', { style:{ fontSize:15, fontWeight:'700', color:C.text } }, '🧳 Travel Packing List'),
+      h('div', { style:{ fontSize:12, color:C.textMid, marginTop:3 } }, 'Pick your destination and trip length')
+    ),
+
+    h('div', { style:{ padding:16 } },
+
+      // Destination
+      h(Card, null,
+        h(SectionLabel, { text:'Where are you going?' }),
+        DESTINATIONS.map(function(d){
+          return h('div', { key:d.id, onClick:function(){ setDest(d.id); setBuilt(false); }, style:{
+            display:'flex', alignItems:'center', gap:14, padding:'14px 16px', borderRadius:12,
+            cursor:'pointer', marginBottom:10,
+            border:'2px solid '+(dest===d.id ? C.text : C.border),
+            background: dest===d.id ? C.yellow : C.card2 } },
+            h('span', { style:{ fontSize:26 } }, d.emoji),
+            h('div', { style:{ flex:1 } },
+              h('div', { style:{ fontSize:15, fontWeight:'700', color:C.text } }, d.label),
+              h('div', { style:{ fontSize:12, color:C.textSoft, marginTop:2 } }, d.desc)
+            ),
+            dest===d.id && h('span', { style:{ color:C.green, fontSize:20, fontWeight:'700' } }, '✓')
+          );
+        })
+      ),
+
+      // Days
+      h(Card, null,
+        h(SectionLabel, { text:'How many days?' }),
+        h('div', { style:{ display:'flex', gap:10, flexWrap:'wrap' } },
+          [3,5,7,10,14].map(function(d){
+            return h(ChoiceBtn, { key:d, label:d+' days', active:days===d,
+              onClick:function(){ setDays(d); setBuilt(false); } });
           })
-        ),
+        )
+      ),
 
-        // ── TRAVEL TAB ──
-        tab === 'travel' && h('div', { style:{ padding:16 } },
+      // Build button
+      !built && h('div', { style:{ display:'flex' } },
+        h(BigBtn, { label:'Show My Packing List 🎒', disabled:!dest,
+          onClick:function(){ if(dest) setBuilt(true); } })
+      ),
 
-          // Step 0
-          step === 0 && h(Card, null,
-            h('div', { style:{ textAlign:'center', padding:'16px 0 20px' } },
-              h('div', { style:{ fontSize:48, marginBottom:12 } }, '🧳'),
-              h('h2', { style:{ color:C.orange, fontSize:20, margin:'0 0 12px', fontWeight:'700' } }, 'Family Travel Medical Kit'),
-              h('p',  { style:{ color:C.textMid, fontSize:14, lineHeight:1.7, margin:'0 0 6px' } },
-                'Answer 3 questions to get a personalised list of medicines for your trip. Based on your family size, ages and destination.'),
-              
-            ),
-            h('div', { style:{ display:'flex' } }, h(BigBtn, { label:"Let's Build My Kit →", onClick:function(){ setStep(1); } }))
+      // Kit list
+      built && h(Fragment, null,
+        h('div', { style:{ background:C.yellow, borderRadius:14, padding:'14px 16px', marginBottom:14,
+          display:'flex', justifyContent:'space-between', alignItems:'center' } },
+          h('div', null,
+            h('div', { style:{ fontSize:14, fontWeight:'700', color:C.text } },
+              (DESTINATIONS.find(function(d){ return d.id===dest; })||{}).label+' · '+days+' days'),
+            h('div', { style:{ fontSize:12, color:C.textMid, marginTop:2 } }, 'Tap each item as you pack it')
           ),
-
-          // Step 1
-          step === 1 && h(Fragment, null,
-            h(Card, null,
-              h(SectionTitle, { text:'How many kids are travelling?' }),
-              h('div', { style:{ display:'flex', gap:10, flexWrap:'wrap' } },
-                [1,2,3,4].map(function(n){ return h(ChoiceBtn, { key:n, label:n+(n===1?' kid':' kids'), active:numKids===n, onClick:function(){ setKidCount(n); } }); })
-              )
-            ),
-            h(Card, null,
-              h(SectionTitle, { text:'Age of each child' }),
-              h('div', { style:{ display:'flex', flexDirection:'column', gap:16 } },
-                kidAges.map(function(age, i){
-                  return h('div', { key:i, style:{ display:'flex', alignItems:'center', justifyContent:'space-between' } },
-                    h('span', { style:{ fontSize:15, fontWeight:'700', color:C.textMid } }, 'Child '+(i+1)),
-                    h('div',  { style:{ display:'flex', alignItems:'center', gap:8 } },
-                      h(Stepper, { value:age, onChange:function(v){ setKidAge(i,v); } }),
-                      h('span', { style:{ fontSize:13, color:C.textSoft, minWidth:26 } }, 'yrs')
-                    )
-                  );
-                })
-              )
-            ),
-            h(Card, null,
-              h(SectionTitle, { text:'How many adults?' }),
-              h('div', { style:{ display:'flex', gap:10, flexWrap:'wrap' } },
-                [1,2,3,4].map(function(n){ return h(ChoiceBtn, { key:n, label:n+(n===1?' adult':' adults'), active:adults===n, onClick:function(){ setAdults(n); } }); })
-              )
-            ),
-            h('div', { style:{ display:'flex', gap:10 } },
-              h(BackBtn, { onClick:function(){ setStep(0); } }),
-              h(BigBtn,  { label:'Next →', onClick:function(){ setStep(2); } })
-            )
-          ),
-
-          // Step 2
-          step === 2 && h(Fragment, null,
-            h(Card, null,
-              h(SectionTitle, { text:'How many days?' }),
-              h('div', { style:{ display:'flex', gap:10, flexWrap:'wrap' } },
-                [3,5,7,10,14].map(function(d){ return h(ChoiceBtn, { key:d, label:d+' days', active:days===d, onClick:function(){ setDays(d); } }); })
-              )
-            ),
-            h(Card, null,
-              h(SectionTitle, { text:'Where are you going?' }),
-              DESTINATIONS.map(function(d){
-                return h('div', { key:d.id, onClick:function(){ setDest(d.id); }, style:{
-                  display:'flex', alignItems:'center', gap:14, padding:'14px 16px',
-                  borderRadius:12, cursor:'pointer', marginBottom:10,
-                  border:'2px solid '+(dest===d.id ? C.orange : C.border),
-                  background: dest===d.id ? '#FEF0E6' : C.card2 }},
-                  h('span', { style:{ fontSize:26 } }, d.emoji),
-                  h('div',  { style:{ flex:1 } },
-                    h('div', { style:{ fontSize:15, fontWeight:'700', color:C.text } }, d.label),
-                    h('div', { style:{ fontSize:12, color:C.textSoft, marginTop:2 } }, d.desc)
-                  ),
-                  dest===d.id && h('span', { style:{ color:C.green, fontSize:20, fontWeight:'700' } }, '✓')
-                );
-              })
-            ),
-            h('div', { style:{ display:'flex', gap:10 } },
-              h(BackBtn, { onClick:function(){ setStep(1); } }),
-              h(BigBtn,  { label:'Build My Kit 🎒', onClick:function(){ setStep(3); }, disabled:!dest })
-            )
-          ),
-
-          // Step 3 — Result
-          step === 3 && h(Fragment, null,
-            h(SummaryBar, {
-              topLine: numKids+' kid'+(numKids>1?'s':'')+' + '+adults+' adult'+(adults>1?'s':'')+' · '+days+' days',
-              bottomLine: (DESTINATIONS.find(function(d){ return d.id===dest; })||{}).label,
-              count: tPacked+'/'+allItems.length, label:'packed'
-            }),
-            kit.map(function(sec){
-              return h(Card, { key:sec.section },
-                h('div', { style:{ fontSize:16, fontWeight:'700', color:'#1C1C1E', marginBottom:14 } }, sec.section),
-                sec.items.map(function(item){
-                  return h(MedRow, { key:item.name, name:item.name, type:item.type,
-                    qty:item.qty, desc:item.desc, showQty:true,
-                    checked:!!tChecked[item.name], onToggle:function(){ toggleT(item.name); } });
-                })
-              );
-            }),
-            h(Note, { text:'⚠️ Always consult your family doctor before travel. Tap each medicine to mark it as packed.' }),
-            h('div', { style:{ display:'flex', gap:10 } },
-              h(BigBtn, { label:'← Start Over', onClick:function(){ setStep(0); setTChecked({}); setDest(null); } })
-            ),
-            h('div', { style:{ height:20 } })
+          h('div', { style:{ background:'rgba(0,0,0,0.1)', borderRadius:10, padding:'8px 14px', textAlign:'center' } },
+            h('div', { style:{ fontSize:22, fontWeight:'700', color:C.text } }, tPacked+'/'+kit.length),
+            h('div', { style:{ fontSize:11, color:C.textMid } }, 'packed')
           )
         ),
 
-        // ── HOME TAB ──
-        tab === 'home' && h('div', { style:{ padding:16 } },
-          h(SummaryBar, {
-            topLine:'Home Medicine Cabinet',
-            bottomLine:'All 34 medicines · Tick what you have at home',
-            count:hPacked+'/34', label:'have it'
-          }),
-          HOME_MEDS.map(function(med){
-            return h(MedRow, { key:med.id, name:med.id+'. '+med.name, type:med.type,
-              qty:null, desc:med.desc, showQty:false,
-              checked:!!hChecked[med.id], onToggle:function(){ toggleH(med.id); } });
-          }),
-          h(Note, { text:'⚠️ Keep medicines in a cool dry place. Check expiry dates every 6 months. Antibiotics always need a prescription.' })
-        )
-      );
-    }
+        kit.map(function(item){
+          var done = !!tChecked[item.name];
+          return h('div', { key:item.name, onClick:function(){ toggleT(item.name); },
+            style:{ display:'flex', gap:12, padding:'14px', borderRadius:12, cursor:'pointer',
+              marginBottom:10, border:'1px solid '+(done ? C.green : C.border),
+              background: done ? C.greenBg : C.card, opacity: done ? 0.6 : 1 } },
+            h('div', { style:{ width:24, height:24, minWidth:24, borderRadius:7, marginTop:1,
+              border:'2px solid '+(done ? C.green : C.border), background: done ? C.green : 'transparent',
+              display:'flex', alignItems:'center', justifyContent:'center' } },
+              done && h('span', { style:{ color:'#fff', fontSize:14 } }, '✓')
+            ),
+            h('div', { style:{ flex:1, minWidth:0 } },
+              h('div', { style:{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:8 } },
+                h('span', { style:{ fontSize:15, fontWeight:'700', color:C.text,
+                  textDecoration: done ? 'line-through' : 'none' } }, item.name),
+                h(TypeBadge, { type:item.type })
+              ),
+              h('div', { style:{ fontSize:12, color:C.textMid, fontWeight:'700', marginTop:4 } }, 'Qty: '+item.qty),
+              h('div', { style:{ fontSize:13, color:C.textMid, marginTop:4, lineHeight:1.5 } }, item.desc)
+            )
+          );
+        }),
 
-    ReactDOM.createRoot(document.getElementById('root')).render(h(App, null));
-  </script>
+        h(Note, { text:'⚠️ Antibiotics must be prescribed by a doctor. Always check with your doctor before travel.' }),
+        h('div', { style:{ display:'flex', gap:10 } },
+          h(BigBtn, { label:'← Start Over', onClick:function(){ setBuilt(false); setTChecked({}); setDest(null); } })
+        ),
+        h('div', { style:{ height:20 } })
+      )
+    )
+  );
+}
+
+// ── Main App ──────────────────────────────────────────────────────────────────
+function App() {
+  var tabState = useState('home'); var tab = tabState[0]; var setTab = tabState[1];
+  var TABS = [
+    { id:'travel', label:'✈️ Travel' },
+    { id:'home',   label:'🏠 Home'   },
+    { id:'find',   label:'🔍 Find'   },
+  ];
+
+  return h('div', { style:{ minHeight:'100vh', background:C.bg } },
+    // Header
+    h('div', { style:{ background:C.yellow, padding:'20px 20px 0', textAlign:'center' } },
+      h('h1', { style:{ color:C.text, fontSize:20, fontWeight:'700', margin:'0 0 2px' } }, '💊 Family Medicine App'),
+      h('p', { style:{ color:C.textMid, fontSize:11, margin:'0 0 14px' } }, 'Travel Kit · Home Cabinet · Quick Find'),
+      // Tab bar
+      h('div', { style:{ display:'flex', background:'rgba(0,0,0,0.08)', borderRadius:'12px 12px 0 0',
+        padding:'4px 4px 0' } },
+        TABS.map(function(t){
+          return h('button', { key:t.id, onClick:function(){ setTab(t.id); }, style:{
+            flex:1, padding:'10px 6px', border:'none', cursor:'pointer', borderRadius:'10px 10px 0 0',
+            background: tab===t.id ? C.card : 'transparent',
+            color: tab===t.id ? C.text : C.textMid,
+            fontSize:13, fontWeight: tab===t.id ? '700':'400',
+          }}, t.label);
+        })
+      )
+    ),
+
+    // Content
+    h('div', { style:{ paddingBottom:40 } },
+      tab === 'travel' && h(TravelTab),
+      tab === 'home'   && h(HomeTab),
+      tab === 'find'   && h(QuickFindTab)
+    )
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(h(App, null));
+</script>
 </body>
 </html>
